@@ -31,28 +31,28 @@ Patents
 
 Work experience
 ======
-## **Research Assistant**, Peng Cheng Laboratory  <span style="float:right;">*Aug 2024 – Aug 2025*<span>
+<span style="font-size:1.1em;">**Research Assistant**, Peng Cheng Laboratory  <span style="float:right;">*Aug 2024 – Aug 2025*<span></span>
 
 *Research on Multi-task Adversarial Attacks for Autonomous Driving, Shenzhen, China*
 * Proposed a bi-level optimization framework for universal adversarial patches, dynamically reweighting multi-task losses (3D detection, segmentation, depth estimation).  
 * Designed scene-oriented and object-oriented attack pipelines on nuScenes, achieving **30–45% degradation** across all tasks.  
 * Revealed perception vulnerabilities and guided robust multi-modal fusion system design.
 
-## **Research Assistant**, HITSZ–Zhengtong Joint Lab  <span style="float:right;">*Feb 2024 – Jul 2024*<span>
+<span style="font-size:1.1em;">**Research Assistant**, HITSZ–Zhengtong Joint Lab  <span style="float:right;">*Feb 2024 – Jul 2024*<span></span>
 
 *Research on Robust Camouflage Generation Based on 3D Models, Shenzhen, China*
 * Developed adversarial camouflage using conditional rendering on 3D ship models.  
 * Reproduced 3D reconstruction & neural rendering pipelines; curated multi-view datasets.  
 * Analyzed adversarial robustness of navigation-targeted detection systems.
 
-## **Intern & Technical Consultant.** <span style="float:right;">*Nov 2024 – Feb 2025*</span>
+<span style="font-size:1.1em;">**Intern & Technical Consultant.**  <span style="float:right;">*Nov 2024 – Feb 2025*</span></span>
 
 *Hong Kong Yuling (Far East) Co., Ltd, Hong Kong*
 * Designed embedded LLM system architecture and dialogue management modules.  
 * Built multimodal control pipeline linking LLMs with IoT devices & WeChat Mini Program.  
 * Developed a real-time conversational AI prototype for interactive physical systems.
 
-## **Intern — AI Framework Evaluation.** <span style="float:right;">*Sept 2023 – Jan 2024*</span>
+<span style="font-size:1.1em;">**Intern — AI Framework Evaluation.** <span style="float:right;">*Sept 2023 – Jan 2024*</span>
 
 *Huawei Technologies Co., Ltd, Shenzhen, China*
 * Benchmarked MindSpore against PyTorch/TensorFlow with classification & transfer learning tasks.  
