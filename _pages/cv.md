@@ -24,38 +24,34 @@ Patents
 ======
 * **An Optimization Method for Adversarial Patch Generation with Joint Temporal Feature Information**  
   *Chinese National Invention Patent*
----
+
 * **An Adaptive Weighting Bi-Level Optimization Framework for Multi-Task Adversarial Patch Generation**  
   *Chinese National Invention Patent*
 
 
 Work experience
 ======
-**Research Assistant**, Peng Cheng Laboratory  
-*Multi-task Joint Adversarial Attacks for Autonomous Driving*  
-*Aug 2024 – Aug 2025, Shenzhen, China*
+**Research Assistant**, Peng Cheng Laboratory  <span style="float:right;">*Aug 2024 – Aug 2025, Shenzhen, China*<span>
+*Research on Multi-task Joint Adversarial Attacks for Autonomous Driving*  
 
 * Proposed a bi-level optimization framework for universal adversarial patches, dynamically reweighting multi-task losses (3D detection, segmentation, depth estimation).  
 * Designed scene-oriented and object-oriented attack pipelines on nuScenes, achieving **30–45% degradation** across all tasks.  
 * Revealed perception vulnerabilities and guided robust multi-modal fusion system design.
----
-**Research Assistant**, HITSZ–Zhengtong Joint Lab  
-*Robust Camouflage Generation Based on 3D Ship Models*  
-*Feb 2024 – Jul 2024, Shenzhen, China*
----
+
+**Research Assistant**, HITSZ–Zhengtong Joint Lab  <span style="float:right;">*Feb 2024 – Jul 2024, Shenzhen, China*<span>
+*Research on Robust Camouflage Generation Based on 3D Ship Models*  
+
 * Developed adversarial camouflage using conditional rendering on 3D ship models.  
 * Reproduced 3D reconstruction & neural rendering pipelines; curated multi-view datasets.  
 * Analyzed adversarial robustness of navigation-targeted detection systems.
----
-**Intern & Technical Consultant**, Hong Kong Yuling (Far East) Co., Ltd.  
-*Nov 2024 – Feb 2025, Hong Kong S.A.R*
+
+**Intern & Technical Consultant**, Hong Kong Yuling (Far East) Co., Ltd. <span style="float:right;">*Nov 2024 – Feb 2025, Hong Kong S.A.R*</span>
 
 * Designed embedded LLM system architecture and dialogue management modules.  
 * Built multimodal control pipeline linking LLMs with IoT devices & WeChat Mini Program.  
 * Developed a real-time conversational AI prototype for interactive physical systems.
----
-**Intern — AI Framework Evaluation**, Huawei Technologies Co., Ltd.  
-*Sept 2023 – Jan 2024, Shenzhen, China*
+
+**Intern — AI Framework Evaluation**, Huawei Technologies Co., Ltd. <span style="float:right;">*Sept 2023 – Jan 2024, Shenzhen, China*</span>
 
 * Benchmarked MindSpore against PyTorch/TensorFlow with classification & transfer learning tasks.  
 * Conducted diverse ML experiments (mushrooms, real estate trends, stock prediction).  
@@ -63,23 +59,18 @@ Work experience
 
 Projects
 ======
-**Intelligent Vehicle Maze Escape & Map Generation**  
-*May 2023 – Jul 2023*
+**Intelligent Vehicle Maze Escape & Map Generation** <span style="float:right;">*May 2023 – Jul 2023*</span>
 
 * Designed system simulating autonomous driving in maze-like environments.  
-  * Implemented YOLO-based obstacle detection and CNN-based navigation strategies.  
-    * Built algorithms for online map generation and real-time path optimization.
+* Implemented YOLO-based obstacle detection and CNN-based navigation strategies.  
+* Built algorithms for online map generation and real-time path optimization.
 
-**AR Science Laboratory (Hololens 2)** <span style="float:right;">Sept 2021 – Jun 2022</span>
+**AR Science Laboratory (Hololens 2)** <span style="float:right;">*Sept 2021 – Jun 2022*</span>
 
 * Built immersive AR experiment environment for physics & chemistry.  
 * Created 3D virtual equipment using 3DsMax and programmed interaction via C#.  
 * Delivered functional AR prototype supporting STEM education research.
 
-
-  * Built immersive AR experiment environment for physics & chemistry.  
-  * Created 3D virtual equipment using 3DsMax and programmed interaction via C#.  
-  * Delivered functional AR prototype supporting STEM education research.
 
 
 Awards
