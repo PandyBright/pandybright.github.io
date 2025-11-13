@@ -9,8 +9,6 @@ excerpt: >
 date: 2025-01-15
 venue: "To be Submitted"
 #paperurl: "/files/BEV_Survey.pdf"
-slidesurl: ""
-bibtexurl: ""
 citation: >
   To be Declared.
 ---
