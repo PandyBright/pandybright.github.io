@@ -1,6 +1,6 @@
 ---
 permalink: /
-title: "Welcome to Pandy Bright's Homepage!"
+title: "Pandy Bright"
 author_profile: true
 redirect_from: 
   - /about/
