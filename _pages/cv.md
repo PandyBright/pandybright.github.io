@@ -11,8 +11,9 @@ redirect_from:
 
 Education
 ======
-* **The Chinese University of Hong Kong (CUHK)**   <span style="float:right;">*Hong Kong S.A.R*</span>
-  **Master in Artificial Intelligence** <span style="float:right;">*2025.09 – 2027.01 (Expected)*</span>
+* **The Chinese University of Hong Kong (CUHK)**   <span style="float:right;">**Hong Kong S.A.R**</span>
+
+  **Master in Artificial Intelligence** <span style="float:right;">**2025.09 – 2027.01 (Expected)**</span>
   
 * **Harbin Institute of Technology, Shenzhen (HITSZ)** <span style="float:right;">*Shenzhen, China*</span>  
   **Bachelor of Engineering in Computer Science** <span style="float:right;">*2021.09 – 2025.06*</span>
