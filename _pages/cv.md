@@ -11,54 +11,104 @@ redirect_from:
 
 Education
 ======
-* Ph.D in Version Control Theory, GitHub University, 2018 (expected)
-* M.S. in Jekyll, GitHub University, 2014
-* B.S. in GitHub, GitHub University, 2012
+* **Master in Artificial Intelligence**, The Chinese University of Hong Kong (CUHK)  
+  *2025.09 – 2027.01 (Expected), Hong Kong S.A.R*
+  
+* **Bachelor of Engineering in Computer Science**, Harbin Institute of Technology, Shenzhen (HITSZ)  
+  *2021.09 – 2025.06, Shenzhen, China*
+
+* **Exchange Student**, National University of Singapore (NUS)  
+  *2023.05 – 2023.07, Singapore*
+
+Patents
+======
+* **An Optimization Method for Adversarial Patch Generation with Joint Temporal Feature Information**  
+  *Chinese National Invention Patent — Submitted*
+
+* **An Adaptive Weighting Bi-Level Optimization Framework for Multi-Task Adversarial Patch Generation**  
+  *Chinese National Invention Patent — Submitted*
+
 
 Work experience
 ======
-* Spring 2024: Academic Pages Collaborator
-  * GitHub University
-  * Duties includes: Updates and improvements to template
-  * Supervisor: The Users
+**Research Assistant**, Peng Cheng Laboratory  
+*Multi-task Joint Adversarial Attacks for Autonomous Driving*  
+*Aug 2024 – Aug 2025, Shenzhen, China*
 
-* Fall 2015: Research Assistant
-  * GitHub University
-  * Duties included: Merging pull requests
-  * Supervisor: Professor Hub
+* Proposed a bi-level optimization framework for universal adversarial patches, dynamically reweighting multi-task losses (3D detection, segmentation, depth estimation).  
+* Designed scene-oriented and object-oriented attack pipelines on nuScenes, achieving **30–45% degradation** across all tasks.  
+* Revealed perception vulnerabilities and guided robust multi-modal fusion system design.
 
-* Summer 2015: Research Assistant
-  * GitHub University
-  * Duties included: Tagging issues
-  * Supervisor: Professor Git
-  
-Skills
+**Research Assistant**, HITSZ–Zhengtong Joint Lab  
+*Robust Camouflage Generation Based on 3D Ship Models*  
+*Feb 2024 – Jul 2024, Shenzhen, China*
+
+* Developed adversarial camouflage using conditional rendering on 3D ship models.  
+* Reproduced 3D reconstruction & neural rendering pipelines; curated multi-view datasets.  
+* Analyzed adversarial robustness of navigation-targeted detection systems.
+
+**Intern & Technical Consultant**, Hong Kong Yuling (Far East) Co., Ltd.  
+*Nov 2024 – Feb 2025, Hong Kong S.A.R*
+
+* Designed embedded LLM system architecture and dialogue management modules.  
+* Built multimodal control pipeline linking LLMs with IoT devices & WeChat Mini Program.  
+* Developed a real-time conversational AI prototype for interactive physical systems.
+
+**Intern — AI Framework Evaluation**, Huawei Technologies Co., Ltd.  
+*Sept 2023 – Jan 2024, Shenzhen, China*
+
+* Benchmarked MindSpore against PyTorch/TensorFlow with classification & transfer learning tasks.  
+* Conducted diverse ML experiments (mushrooms, real estate trends, stock prediction).  
+* Provided feedback for early-stage framework stability and developer experience.
+
+Projects
 ======
-* Skill 1
-* Skill 2
-  * Sub-skill 2.1
-  * Sub-skill 2.2
-  * Sub-skill 2.3
-* Skill 3
+**Intelligent Vehicle Maze Escape & Map Generation**  
+*May 2023 – Jul 2023*
+
+* Designed system simulating autonomous driving in maze-like environments.  
+* Implemented YOLO-based obstacle detection and CNN-based navigation strategies.  
+* Built algorithms for online map generation and real-time path optimization.
+
+**AR Science Laboratory (Hololens 2)**  
+*Sept 2021 – Jun 2022*
+
+* Built immersive AR experiment environment for physics & chemistry.  
+* Created 3D virtual equipment using 3DsMax and programmed interaction via C#.  
+* Delivered functional AR prototype supporting STEM education research.
+
+
+Awards
+======
+* Third Prize — National College Students Mathematics Competition  
+* Gold Award — Innovation and Entrepreneurship Competition (Rank 1), HITSZ  
+* First Prize — Guangbo Scholarship (2020, 2021)  
+* Second Prize — National Academic English Vocabulary Competition (NAEV)
+
+
+Technical Skills
+======
+**Technologies:** TensorFlow, PyTorch, Scikit-Learn, Keras, OpenCV, CUDA, Android SDK, LaTeX  
+**Tools:** Ubuntu, Git, SSH, Jupyter, Docker, Arduino, Raspberry Pi, Pandas, NumPy, Matplotlib, SQL
 
 Publications
 ======
-  <ul>{% for post in site.publications reversed %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul>
+  To be Written
   
-Talks
+Hobbies
 ======
-  <ul>{% for post in site.talks reversed %}
-    {% include archive-single-talk-cv.html  %}
-  {% endfor %}</ul>
+* 📷 **Photography** — Contracted photographer at Visual China Group & New Film Field  
+* 🏀 **Basketball**  
+* 🏓 **Table Tennis**  
+* 🏸 **Badminton**  
+* 🚴 **Cycling**  
+* 🥾 **Hiking**  
+* 🍳 **Cooking**
+
+
   
-Teaching
+Campus Leadership & Activities
 ======
-  <ul>{% for post in site.teaching reversed %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul>
-  
-Service and leadership
-======
-* Currently signed in to 43 different slack teams
+* **Huawei Developer Conference Member** — Participated in ecosystem & cloud tech events  
+* **Zybio Inc. Campus Ambassador** — Promoted industry–academy collaboration  
+* **Director**, Career Services Publicity Dept., HITSZ — Led student–employer communication initiatives
