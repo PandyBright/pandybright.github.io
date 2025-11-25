@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="3567f7a6-b4a3-4360-b7d9-d8db8797c867" name="pandy">
+        <fileTransfer rootFolder="/home/h3c/data/pdy/BEVFusion_MIT" accessType="SFTP" host="10.249.190.40" port="22" sshConfigId="e47c539e-4512-4ace-91b5-14eeb1574369" sshConfig="pandy@10.249.190.40:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
