@@ -6,15 +6,13 @@ redirect_from:
   - /about/
   - /about.html
 ---
-I am currently a Master student in Artificial Intelligence in *The Chinese University of Hong Kong*. Before this, I received my *B.Eng* Degree from *Harbin Institute of Technology, Shenzhen*.
+I am a Master’s student in Artificial Intelligence at *The Chinese University of Hong Kong*, and previously earned my B.Eng from *Harbin Institute of Technology, Shenzhen*. My research interests include autonomous driving, AIoT, and embedded AI.
 
-**My research interests lie in autonomous driving, AIoT, and embedded AI.**
+I am actively seeking a PhD position and welcome opportunities to collaborate.
 
-At the same time, I am looking for a PhD position.
+CV: [Link](https://drive.google.com/file/d/1CbqKm8HxBbC_YprhqSeo_MUgjGx_BzPM/view?usp=sharing)
 
-You can view my CV at the following link: [CV](https://drive.google.com/file/d/1CbqKm8HxBbC_YprhqSeo_MUgjGx_BzPM/view?usp=sharing).
-
-**Feel free to Email me if cooperation！**
+Feel free to reach out via email for collaborations or discussions.
 
 
 
