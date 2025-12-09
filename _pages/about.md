@@ -6,7 +6,7 @@ redirect_from:
   - /about/
   - /about.html
 ---
-I am a Master’s student in Artificial Intelligence at *The Chinese University of Hong Kong*, and previously earned my B.Eng from *Harbin Institute of Technology, Shenzhen*. My research interests include autonomous driving, AIoT, and embedded AI.
+I am a Master’s student in Artificial Intelligence at *The Chinese University of Hong Kong*, and previously earned my B.Eng from *Harbin Institute of Technology, Shenzhen*. My research interests include robotics, AIoT, and embedded AI.
 
 I am actively seeking a PhD position and welcome opportunities to collaborate.
 
