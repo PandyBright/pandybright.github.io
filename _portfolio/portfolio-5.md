@@ -1,7 +1,7 @@
 ---
 title: "Taiwan"
 excerpt: >
-  <a href="https://maps.apple.com/?q=Taiwan" target="_blank" rel="noopener noreferrer">Taiwan</a>
+  <a href="https://maps.apple.com/?q=Taiwan" target="_blank" rel="noopener noreferrer">📍 Taiwan</a>
 collection: portfolio
 ---
 

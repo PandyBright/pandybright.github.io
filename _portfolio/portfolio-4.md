@@ -1,7 +1,7 @@
 ---
 title: "Huizhou"
 excerpt: >
-  <a href="https://maps.apple.com/?q=Huizhou%2C%20Guangdong%2C%20China" target="_blank" rel="noopener noreferrer">Huizhou, Guangdong, China</a>
+  <a href="https://maps.apple.com/?q=Huizhou%2C%20Guangdong%2C%20China" target="_blank" rel="noopener noreferrer">📍 Huizhou, Guangdong, China</a>
 collection: portfolio
 ---
 
