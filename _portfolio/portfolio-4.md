@@ -12,12 +12,6 @@ A short series from Huizhou that moves between sea breeze, urban silhouettes, an
 <img src="/images/huizhou/031EC636-553C-4FEF-87BD-FC5856015FDD_1_105_c.jpeg"
      style="max-width: 1000px; width: 100%; height: auto; display:block; margin:0.5rem auto;">
 
-<img src="/images/huizhou/0B39F65E-9043-4D33-B05B-CA94C9AC43AF_1_105_c.jpeg"
-     style="max-width: 1000px; width: 100%; height: auto; display:block; margin:0.5rem auto;">
-
-<img src="/images/huizhou/1A5AAE5C-0561-40CB-97C2-DB5720390C0C_1_105_c.jpeg"
-     style="max-width: 1000px; width: 100%; height: auto; display:block; margin:0.5rem auto;">
-
 <img src="/images/huizhou/4DC93260-993E-4ACA-8962-40AF25E26DEA_1_105_c.jpeg"
      style="max-width: 1000px; width: 100%; height: auto; display:block; margin:0.5rem auto;">
 
