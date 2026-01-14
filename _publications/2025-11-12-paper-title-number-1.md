@@ -6,11 +6,11 @@ permalink: /publication/2025-bev-survey
 excerpt: >
   A comprehensive survey covering the evolution, methodologies, datasets, applications,
   and future directions of Bird’s Eye View (BEV) perception for autonomous driving.
-date: 2025-01-15
+date: 2025-11-12
 venue: "To be Submitted"
 #paperurl: "/files/BEV_Survey.pdf"
-citation: >
-  To be Declared.
+# citation: >
+#   To be Declared.
 ---
 
 ### Overview  
