@@ -14,8 +14,8 @@ I am a Master’s student in Artificial Intelligence at <a href="https://cuhk.ed
 My earlier research focused on adversarial attacks for autonomous driving perception, especially multi-task systems that combine 3D detection, segmentation, and depth estimation. At <a href="https://www.pcl.ac.cn/" target="_blank" rel="noopener noreferrer"><em>Peng Cheng Laboratory</em></a>, I proposed a bi-level optimization framework for universal adversarial patches, designed scene- and object-oriented attack pipelines on nuScenes, and analyzed robustness issues in multi-modal fusion models.
 
 
-My current research direction is VLA+RL, embodied intelligence, and robotics. I am interested in how vision-language-action models and reinforcement learning can enable robust, generalizable behaviors in real-world robotic systems.
+My current research direction is VLA+RL, VLM, and embodied intelligence. I am interested in how VLA/VLM models and reinforcement learning can enable robust, generalizable behaviors in real-world robotic and auto-driving systems.
 
-I am actively seeking a PhD position and welcome opportunities to collaborate. If you are working on robotics, perception, or embodied intelligence, feel free to reach out.
+I am actively seeking a PhD position and welcome opportunities to collaborate. If you are working on VLA/VLM, perception, or embodied intelligence, feel free to reach out.
 
 CV: <a href="https://drive.google.com/file/d/1CbqKm8HxBbC_YprhqSeo_MUgjGx_BzPM/view?usp=sharing" target="_blank" rel="noopener noreferrer">Link</a>
