@@ -6,7 +6,7 @@ permalink: /publication/2025-multitask-adv-attack
 excerpt: >
   We propose a bi-level optimization framework that generates universal adversarial patches capable of simultaneously degrading 3D object detection, semantic segmentation, and monocular depth estimation in multi-task autonomous driving systems.
 date: 2025-08-01
-venue: 'To be Submitted'
+venue: 'IEEE International Conference on Multimedia & Expo (ICME 2026)'
 #paperurl: '/files/multitask_adv_attack.pdf'
 citation: >
   To be Declared.

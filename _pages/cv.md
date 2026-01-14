@@ -104,7 +104,10 @@ Hobbies
 * 🥾 *Hiking*
 * 🍳 *Cooking*
 
-
+Academic Service
+======
+* **Reviewer**, AAAI Conference on Artificial Intelligence (AAAI 2026)  
+* **Reviewer**, IEEE International Conference on Multimedia & Expo (ICME 2026)
   
 Campus Leadership & Activities
 ======
