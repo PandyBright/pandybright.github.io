@@ -1,7 +1,7 @@
 ---
 title: "Bi-Level Optimization Framework for Robust Multi-Task Adversarial Attacks"
 collection: publications
-category: conferences
+category: manuscripts
 permalink: /publication/2026-multitask-adv-attack
 excerpt: >
   We propose a bi-level optimization framework that generates universal adversarial patches capable of simultaneously degrading 3D object detection, semantic segmentation, and monocular depth estimation in multi-task autonomous driving systems.
