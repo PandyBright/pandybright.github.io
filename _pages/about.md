@@ -18,4 +18,4 @@ My current research direction is VLA+RL, VLM, and embodied intelligence. I am in
 
 I am actively seeking a PhD position and welcome opportunities to collaborate. If you are working on VLA/VLM, perception, or embodied intelligence, feel free to reach out.
 
-CV: <a href="https://drive.google.com/file/d/1CbqKm8HxBbC_YprhqSeo_MUgjGx_BzPM/view?usp=sharing" target="_blank" rel="noopener noreferrer">Link</a>
+CV: <a href="https://drive.google.com/file/d/1JdVlDGJCUTQCpAKiZNZ2YU-L5L2U-f_A/view?usp=sharing" target="_blank" rel="noopener noreferrer">Link</a>

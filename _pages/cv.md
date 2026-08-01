@@ -24,10 +24,10 @@ Education
 Patents
 ======
 * **An Optimization Method for Adversarial Patch Generation with Joint Temporal Feature Information**  
-  *Chinese National Invention Patent*
+  *Chinese Invention Patent, Granted — Grant No. CN120997817B, February 27, 2026*
 
 * **An Adaptive Weighting Bi-Level Optimization Framework for Multi-Task Adversarial Patch Generation**  
-  *Chinese National Invention Patent*
+  *Chinese Invention Patent, Granted — Grant No. CN120894652B, February 10, 2026*
 
 
 Work experience
@@ -106,7 +106,7 @@ Hobbies
 
 Academic Service
 ======
-* **Reviewer**, AAAI Conference on Artificial Intelligence (AAAI 2026)  
+* **Reviewer**, AAAI Conference on Artificial Intelligence (AAAI 2026, 2027)  
 * **Reviewer**, IEEE International Conference on Multimedia & Expo (ICME 2026)
   
 Campus Leadership & Activities
