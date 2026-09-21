@@ -12,7 +12,8 @@ redirect_from:
 Education
 ======
 * **The Chinese University of Hong Kong (CUHK)** <span style="float:right;">*Hong Kong S.A.R*</span>  
-  **Master in Artificial Intelligence** <span style="float:right;">*2025.09 – 2027.01 (Expected)*</span>
+  **Master’s Degree in Artificial Intelligence** <span style="float:right;">*2025.08 – 2026.11*</span>  
+  *Honors: Dean's List 2025–2026*
 
 * **National University of Singapore (NUS)** <span style="float:right;">*Singapore*</span>  
   **Exchange Student** <span style="float:right;">*2023.05 – 2023.07*</span>
@@ -111,6 +112,6 @@ Academic Service
   
 Campus Leadership & Activities
 ======
-* **Huawei Developer Conference Member** — Participated in ecosystem & cloud tech events  
 * **Zybio Inc. Campus Ambassador** — Promoted industry–academy collaboration  
 * **Director**, Career Services Publicity Dept., HITSZ — Led student–employer communication initiatives
+* **Huawei Developer Conference Member** — Participated in ecosystem & cloud tech events  
