@@ -12,7 +12,7 @@ redirect_from:
 Education
 ======
 * **The Chinese University of Hong Kong (CUHK)** <span style="float:right;">*Hong Kong S.A.R*</span>  
-  **Master’s Degree in Artificial Intelligence** <span style="float:right;">*2025.08 – 2026.11*</span>  
+  **Master in Artificial Intelligence** <span style="float:right;">*2025.08 – 2026.11*</span>  
   *Honors: Dean's List 2025–2026*
 
 * **National University of Singapore (NUS)** <span style="float:right;">*Singapore*</span>  
