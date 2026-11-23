@@ -5,13 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' https://widget.supercounters.com https://service.supercounters.com; img-src https://widget.supercounters.com https://s05.flagcounter.com; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' https://widget.supercounters.com https://service.supercounters.com; img-src https://widget.supercounters.com https://s05.flagcounter.com; connect-src 'self' https://pandybright.github.io; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
   <title>Visitor Map</title>
   <style>
     body { margin: 0; overflow: hidden; color-scheme: light dark; font: 14px system-ui, sans-serif; }
-    #map { width: 420px; transform-origin: top left; }
+    #map { width: 420px; transform-origin: top left; pointer-events: none; }
     #status { margin: 0; padding: 0.6rem 0; }
     #status img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+    #points { position: absolute; inset: 0; pointer-events: none; }
+    .map-point {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+    }
+    .map-point::before {
+      display: block;
+      width: 6px;
+      height: 6px;
+      margin: auto;
+      border: 1px solid #fff;
+      border-radius: 50%;
+      background: #f25a65;
+      content: "";
+    }
+    .map-point:hover::before, .map-point:focus-visible::before {
+      box-shadow: 0 0 0 3px #fff8;
+    }
+    #city-label {
+      position: absolute;
+      max-width: calc(100% - 8px);
+      box-sizing: border-box;
+      padding: 0.28rem 0.45rem;
+      border-radius: 0.28rem;
+      background: #142449;
+      color: #fff;
+      font-size: 12px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -19,14 +59,95 @@
   <div id="map">
     <script src="https://widget.supercounters.com/ssl/map.js" defer></script>
   </div>
+  <div id="points" role="group" aria-label="Visitor locations"></div>
+  <div id="city-label" aria-hidden="true" hidden></div>
   <script>
     var sc_map_var = [];
 
     const map = document.querySelector("#map");
     const statusMessage = document.querySelector("#status");
+    const pointLayer = document.querySelector("#points");
+    const cityLabel = document.querySelector("#city-label");
+    const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+    let visitorPoints = [];
 
     function fitMap() {
       map.style.transform = "scale(" + (window.innerWidth / map.offsetWidth) + ")";
+      cityLabel.hidden = true;
+    }
+
+    function nearbyCity(latitude, longitude, cities) {
+      const maxOffset = 0.32;
+      const radians = Math.PI / 180;
+      let bestDistance = maxOffset ** 2;
+      let nearest;
+
+      // Coordinates come from IP-based geolocation. Skip distant city matches.
+      for (const entry of cities) {
+        const [lat, lon] = entry;
+        const latitudeOffset = latitude - lat;
+        if (latitudeOffset > maxOffset) continue;
+        if (latitudeOffset < -maxOffset) break;
+        const longitudeOffset = ((longitude - lon + 540) % 360 - 180) * Math.cos((latitude + lat) * radians / 2);
+        const distance = latitudeOffset ** 2 + longitudeOffset ** 2;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          nearest = entry;
+        }
+      }
+      if (!nearest) return;
+      const [, , city, countryCode, province] = nearest;
+      const region = province || regionNames.of(countryCode);
+      return region === city ? city : city + ", " + region;
+    }
+
+    function showCity(button) {
+      cityLabel.textContent = button.getAttribute("aria-label");
+      cityLabel.hidden = false;
+      const marker = button.getBoundingClientRect();
+      const center = marker.left + marker.width / 2;
+      const left = Math.max(4, Math.min(center - cityLabel.offsetWidth / 2, innerWidth - cityLabel.offsetWidth - 4));
+      const above = marker.top - cityLabel.offsetHeight - 1;
+      cityLabel.style.left = left + "px";
+      cityLabel.style.top = (above < 4 ? marker.bottom + 1 : above) + "px";
+    }
+
+    async function labelPoints(providerMap) {
+      if (!visitorPoints.length) return;
+      let cities;
+      try {
+        // City names, centroids, and provinces are adapted from GeoNames (CC BY 4.0).
+        const response = await fetch("./visitor-cities.json", { credentials: "omit" });
+        if (!response.ok) return;
+        cities = await response.json();
+      } catch {
+        return;
+      }
+
+      const locations = new Set();
+      for (const { la, lo } of visitorPoints) {
+        if (!Number.isFinite(la) || !Number.isFinite(lo) || Math.abs(la) > 90 || Math.abs(lo) > 180) continue;
+        const key = la + "," + lo;
+        if (locations.has(key)) continue;
+        locations.add(key);
+
+        const city = nearbyCity(la, lo, cities);
+        const button = document.createElement("button");
+        button.className = "map-point";
+        button.type = "button";
+        button.style.left = ((lo + 180) / 3.6) + "%";
+        button.style.top = ((90 - la) / 1.8) + "%";
+        button.setAttribute("aria-label", city ? "Near " + city : "City name unavailable");
+        button.addEventListener("pointerenter", () => showCity(button));
+        button.addEventListener("pointerleave", (event) => {
+          if (event.pointerType !== "touch" && document.activeElement !== button) cityLabel.hidden = true;
+        });
+        button.addEventListener("focus", () => showCity(button));
+        button.addEventListener("blur", () => { cityLabel.hidden = true; });
+        button.addEventListener("click", () => showCity(button));
+        pointLayer.append(button);
+      }
+      if (pointLayer.childElementCount) providerMap.replaceChildren();
     }
 
     fitMap();
@@ -41,15 +162,35 @@
     }, 8000);
 
     const observer = new MutationObserver(() => {
-      if (!map.querySelector("#scvmap")) return;
+      const providerMap = map.querySelector("#scvmap");
+      if (!providerMap) return;
       clearTimeout(timeout);
       statusMessage.hidden = true;
       observer.disconnect();
+      labelPoints(providerMap);
     });
     observer.observe(map, { childList: true });
 
     window.addEventListener("DOMContentLoaded", () => {
-      if (typeof sc_map === "function") sc_map(1741601, "112288", "ff0000", 1);
+      if (typeof sc_map !== "function") return;
+      const renderMap = window.sc_show_map;
+      window.sc_show_map = (id, payload) => {
+        try {
+          const points = JSON.parse(payload.slice(1, -1));
+          if (Array.isArray(points)) visitorPoints = points;
+        } catch {
+          // The provider can still render its original map without labels.
+        }
+        renderMap(id, payload);
+      };
+      sc_map(1741601, "112288", "ff0000", 1);
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".map-point")) cityLabel.hidden = true;
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") cityLabel.hidden = true;
     });
   </script>
 </body>

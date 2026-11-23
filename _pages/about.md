@@ -3,6 +3,7 @@ permalink: /
 title: "Pandy Bright"
 description: "Pandy Bright is a research assistant at CUHK interested in embodied intelligence and AIoT."
 author_profile: true
+show_map: true
 redirect_from: 
   - /about/
   - /about.html
@@ -45,15 +46,4 @@ My earlier research focused on the robustness of autonomous driving perception, 
 {% endfor %}
 </ul>
 
-</section>
-
-<section class="home-section" aria-labelledby="visitor-map-title">
-  <h2 id="visitor-map-title">Visitor Map</h2>
-  <div class="visitor-map">
-    <iframe src="{{ '/assets/visitor-map.html' | relative_url }}" title="Approximate visitor locations"
-            loading="lazy" sandbox="allow-scripts" referrerpolicy="no-referrer" tabindex="-1" aria-hidden="true"></iframe>
-    <a href="https://www.supercounters.com/map/1741601" target="_blank" rel="noopener noreferrer">
-      Explore city-level locations <span aria-hidden="true">↗</span>
-    </a>
-  </div>
 </section>
