@@ -1,5 +1,9 @@
 ---
 title: "Taiwan"
+permalink: /photography/taiwan/
+redirect_from: /portfolio/portfolio-5/
+cover: taiwan
+cover_alt: "Colorful houses overlooking a harbor in Taiwan"
 excerpt: >
   <a href="https://maps.apple.com/?q=Taiwan" target="_blank" rel="noopener noreferrer">📍 Taiwan</a>
 collection: portfolio

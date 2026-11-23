@@ -1,5 +1,10 @@
 ---
 title: "Huizhou"
+permalink: /photography/huizhou/
+redirect_from: /portfolio/portfolio-4/
+location: "Huizhou, China"
+cover: huizhou
+cover_alt: "A high view over the beach and blue water in Huizhou"
 excerpt: >
   <a href="https://maps.apple.com/?q=Huizhou%2C%20Guangdong%2C%20China" target="_blank" rel="noopener noreferrer">📍 Huizhou, Guangdong, China</a>
 collection: portfolio

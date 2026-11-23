@@ -1,5 +1,10 @@
 ---
 title: "Shenzhen Observatory"
+permalink: /photography/shenzhen-observatory/
+redirect_from: /portfolio/portfolio-1/
+location: "Shenzhen, China"
+cover: shenzhen-observatory
+cover_alt: "Turquoise waves breaking against the rocky coast below Shenzhen Observatory"
 excerpt: >
   <a href="https://maps.apple.com/?address=Dapeng%20New%20Area%20Nan'ao%20Residential%20District%20Xichong%20Community%20Tianwen%20Road,%20Longgang,%20Shenzhen,%20Guangdong%20China&auid=1118368668849294&ll=22.479717,114.559350&lsp=57879&q=Shenzhen%20Observatory" target="_blank">📍 Shenzhen Observatory</a><br/>
 collection: portfolio
