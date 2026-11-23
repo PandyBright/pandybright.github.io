@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' https://widget.supercounters.com https://service.supercounters.com; img-src https://widget.supercounters.com https://s05.flagcounter.com; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <title>Visitor Map</title>
+  <style>
+    body { margin: 0; overflow: hidden; color-scheme: light dark; font: 14px system-ui, sans-serif; }
+    #map { width: 420px; transform-origin: top left; }
+    #status { margin: 0; padding: 0.6rem 0; }
+    #status img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  </style>
+</head>
+<body>
+  <p id="status">Loading visitor map…</p>
+  <div id="map">
+    <script src="https://widget.supercounters.com/ssl/map.js" defer></script>
+  </div>
+  <script>
+    var sc_map_var = [];
+
+    const map = document.querySelector("#map");
+    const statusMessage = document.querySelector("#status");
+
+    function fitMap() {
+      map.style.transform = "scale(" + (window.innerWidth / map.offsetWidth) + ")";
+    }
+
+    fitMap();
+    window.addEventListener("resize", fitMap);
+
+    const timeout = setTimeout(() => {
+      statusMessage.textContent = "Visitor map unavailable.";
+      const fallback = new Image();
+      fallback.alt = "Country-level visitor map";
+      fallback.addEventListener("load", () => statusMessage.replaceChildren(fallback), { once: true });
+      fallback.src = "https://s05.flagcounter.com/map/4JbA/size_s/txt_21385E/border_E2E9F5/pageviews_1/viewers_0/";
+    }, 8000);
+
+    const observer = new MutationObserver(() => {
+      if (!map.querySelector("#scvmap")) return;
+      clearTimeout(timeout);
+      statusMessage.hidden = true;
+      observer.disconnect();
+    });
+    observer.observe(map, { childList: true });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (typeof sc_map === "function") sc_map(1741601, "112288", "ff0000", 1);
+    });
+  </script>
+</body>
+</html>

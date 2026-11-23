@@ -3,16 +3,6 @@
 {% if page.author_profile or layout.author_profile or page.sidebar %}
   <div class="sidebar sticky">
   {% if page.author_profile or layout.author_profile %}{% include author-profile.html %}{% endif %}
-  {% if page.show_map %}
-    <div class="sidebar__map">
-      <a class="visitor-map" href="https://s05.flagcounter.com/more/4JbA/" target="_blank" rel="noopener noreferrer">
-        <span class="visitor-map__label">Visitor map <span aria-hidden="true">↗</span></span>
-        <img src="https://s05.flagcounter.com/map/4JbA/size_s/txt_21385E/border_E2E9F5/pageviews_1/viewers_0/"
-             width="400" height="205" loading="lazy" decoding="async" referrerpolicy="no-referrer"
-             alt="Visitor locations and pageviews">
-      </a>
-    </div>
-  {% endif %}
   {% if page.sidebar %}
     {% for s in page.sidebar %}
       {% if s.image %}

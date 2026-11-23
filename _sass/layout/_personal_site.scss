@@ -20,7 +20,7 @@ html[data-theme="dark"] {
 
 @media (hover: hover) and (pointer: fine) {
   body {
-    cursor: url("../cursors/pixel-arrow.png") 4 4, auto;
+    cursor: url("../cursors/arrow.png") 4 3, auto;
   }
 
   p,
@@ -35,7 +35,7 @@ html[data-theme="dark"] {
 
   body :is(a[href], button:not(:disabled), summary, label[for]),
   #theme-toggle a {
-    cursor: url("../cursors/pixel-pointer.png") 12 4, pointer;
+    cursor: url("../cursors/spark.png") 13 13, pointer;
   }
 }
 
@@ -79,27 +79,30 @@ html[data-theme="dark"] {
 }
 
 .visitor-map {
-  display: block;
-  color: var(--site-accent-strong);
-  text-decoration: none;
+  position: relative;
+  width: min(100%, 420px);
+  font-size: 0.875rem;
 
-  &:hover,
-  &:focus-visible {
+  a {
     color: var(--site-accent-strong);
-    text-decoration: underline;
     text-underline-offset: 0.15em;
+
+    &::before {
+      position: absolute;
+      inset: 0;
+      content: "";
+    }
   }
 
-  img {
-    border-radius: 0.2rem;
+  iframe {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2;
+    margin-bottom: 0.45rem;
+    border: 0;
+    pointer-events: none;
   }
-}
-
-.visitor-map__label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
 .home-title {
