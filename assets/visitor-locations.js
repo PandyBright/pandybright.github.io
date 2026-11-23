@@ -44,4 +44,16 @@ function visitorLocationKey({ la, lo, address }) {
   return `${la},${lo},${address}`;
 }
 
-if (typeof module !== "undefined") module.exports = { resolveVisitorLocation, visitorLocationKey };
+function groupVisitorPoints(points, cities) {
+  const locations = new Map();
+  for (const [index, point] of points.entries()) {
+    const location = resolveVisitorLocation(point, cities);
+    if (!location) continue;
+    const key = visitorLocationKey(location);
+    const count = (locations.get(key)?.count ?? 0) + (index < 50 ? 1 : 0);
+    locations.set(key, { ...location, count });
+  }
+  return [...locations.values()];
+}
+
+if (typeof module !== "undefined") module.exports = { resolveVisitorLocation, visitorLocationKey, groupVisitorPoints };

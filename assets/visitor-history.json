@@ -6,5 +6,14 @@
   {"la":41.85,"lo":-87.65,"address":"Chicago, United States"},
   {"la":40.7282,"lo":-74.0776,"address":"Jersey City, United States"},
   {"la":51.4975,"lo":-0.1357,"address":"City of Westminster, United Kingdom"},
-  {"la":41.8265,"lo":-72.7301,"address":"Bloomfield, United States"}
+  {"la":41.8265,"lo":-72.7301,"address":"Bloomfield, United States"},
+  {"la":49.2264,"lo":17.6706,"address":"Zlin, Czechia"},
+  {"la":29.7048,"lo":116.0021,"address":"Jiujiang, Jiangxi, China"},
+  {"la":1.2897,"lo":103.8501,"address":"Singapore"},
+  {"la":20.1113,"lo":77.133,"address":"Washim, India"},
+  {"la":48.8592,"lo":2.3417,"address":"Paris 01 Louvre, France"},
+  {"la":45.499,"lo":-73.5705,"address":"Ville-Marie, Canada"},
+  {"la":43.6533,"lo":-79.3839,"address":"Toronto, Canada"},
+  {"la":35.67,"lo":139.7754,"address":"Chuo, Japan"},
+  {"la":47.6062,"lo":-122.3321,"address":"Seattle, United States"}
 ]

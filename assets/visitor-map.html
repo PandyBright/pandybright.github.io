@@ -66,14 +66,18 @@
   <p id="status" role="status">Loading visitor points…</p>
   <div id="points" role="group" aria-label="Visitor locations"></div>
   <div id="city-label" aria-hidden="true" hidden></div>
-  <script src="./visitor-locations.js"></script>
+  <script src="./visitor-locations.js?v=2"></script>
   <script>
     var sc_map_var = [];
 
     const statusMessage = document.querySelector("#status");
     const pointLayer = document.querySelector("#points");
     const cityLabel = document.querySelector("#city-label");
+    const markers = new Map();
+    let activeMarker;
+
     function showCity(button) {
+      activeMarker = button;
       cityLabel.textContent = button.getAttribute("aria-label");
       cityLabel.hidden = false;
       const marker = button.getBoundingClientRect();
@@ -85,53 +89,50 @@
       cityLabel.style.top = Math.max(4, Math.min(top, innerHeight - cityLabel.offsetHeight - 4)) + "px";
     }
 
-    function labelPoints(recentPoints, history, cities) {
-      const locations = new Map(history.filter(location => location.address)
-        .map(location => [visitorLocationKey(location), { ...location, count: 0 }]));
-      for (const [index, point] of recentPoints.entries()) {
-        const location = resolveVisitorLocation(point, cities);
-        if (!location) continue;
-        const key = visitorLocationKey(location);
-        const count = (locations.get(key)?.count ?? 0) + (index < 50 ? 1 : 0);
-        locations.set(key, { ...location, count });
-      }
+    function renderLocations(history, recent, capturedAt) {
+      const locations = new Map();
+      for (const location of history) locations.set(visitorLocationKey(location), location);
+      for (const location of recent) locations.set(visitorLocationKey(location), location);
+      const asOf = capturedAt ? ` (as of ${capturedAt})` : "";
 
-      for (const { la, lo, address, count } of locations.values()) {
-        const button = document.createElement("button");
-        button.className = "map-point";
-        button.type = "button";
-        button.style.left = ((lo + 180) / 3.6) + "%";
-        button.style.top = ((90 - la) / 1.8) + "%";
+      for (const [key, { la, lo, address, count }] of locations) {
+        let button = markers.get(key);
+        if (!button) {
+          button = document.createElement("button");
+          button.className = "map-point";
+          button.type = "button";
+          button.style.left = ((lo + 180) / 3.6) + "%";
+          button.style.top = ((90 - la) / 1.8) + "%";
+          button.addEventListener("pointerenter", () => showCity(button));
+          button.addEventListener("pointerleave", (event) => {
+            if (event.pointerType !== "touch" && document.activeElement !== button) cityLabel.hidden = true;
+          });
+          button.addEventListener("focus", () => showCity(button));
+          button.addEventListener("blur", () => { cityLabel.hidden = true; });
+          button.addEventListener("click", () => showCity(button));
+          markers.set(key, button);
+          pointLayer.append(button);
+        }
         const visits = count === 1 ? "1 visit" : `${count} visits`;
-        button.setAttribute("aria-label", count ? `${visits} from ${address}` : address);
-        button.addEventListener("pointerenter", () => showCity(button));
-        button.addEventListener("pointerleave", (event) => {
-          if (event.pointerType !== "touch" && document.activeElement !== button) cityLabel.hidden = true;
-        });
-        button.addEventListener("focus", () => showCity(button));
-        button.addEventListener("blur", () => { cityLabel.hidden = true; });
-        button.addEventListener("click", () => showCity(button));
-        pointLayer.append(button);
+        button.setAttribute("aria-label", count ? `${visits} from ${address}${asOf}` : address);
       }
-      if (pointLayer.childElementCount) statusMessage.hidden = true;
-      else statusMessage.textContent = "No visitor locations available.";
+      if (activeMarker && !cityLabel.hidden) showCity(activeMarker);
+      statusMessage.hidden = markers.size > 0;
     }
 
-    async function fetchMapData(filename) {
+    async function fetchMapData(filename, timeout = 12000) {
       try {
         const response = await fetch(`./${filename}${window.location.search}`, {
           credentials: "omit",
-          signal: AbortSignal.timeout(5000)
+          signal: AbortSignal.timeout(timeout)
         });
-        const data = response.ok ? await response.json() : null;
-        if (Array.isArray(data)) return data;
+        if (response.ok) return await response.json();
       } catch { /* The other map data sources can still be displayed. */ }
-      return [];
     }
 
     function fetchRecentPoints() {
       return new Promise(resolve => {
-        const timeout = setTimeout(() => resolve([]), 6500);
+        const timeout = setTimeout(() => resolve([]), 20000);
         // Supercounters sends the newest coordinates through this callback.
         window.sc_show_map = (id, payload) => {
           if (id !== 1741601 || typeof payload !== "string") return;
@@ -153,9 +154,27 @@
       });
     }
 
+    const savedLocations = Promise.all([fetchMapData("visitor-history.json"), fetchMapData("visitor-recent.json")])
+      .then(([history, snapshot]) => {
+        const archived = Array.isArray(history) ? history.filter(location => location?.address) : [];
+        if (!Array.isArray(snapshot?.locations) || !Number.isFinite(Date.parse(snapshot.capturedAt))) {
+          renderLocations(archived, []);
+          return archived;
+        }
+        const capturedAt = new Intl.DateTimeFormat("en-GB", {
+          dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Hong_Kong"
+        }).format(new Date(snapshot.capturedAt)) + " HKT";
+        renderLocations(archived, snapshot.locations, capturedAt);
+        return [...archived, ...snapshot.locations.map(({ la, lo, address }) => ({ la, lo, address }))];
+      });
+
     // City names, centroids and provinces are adapted from GeoNames (CC BY 4.0).
-    Promise.all([fetchRecentPoints(), fetchMapData("visitor-history.json"), fetchMapData("visitor-cities.json")])
-      .then(([recentPoints, history, cities]) => labelPoints(recentPoints, history, cities));
+    Promise.all([savedLocations, fetchRecentPoints(), fetchMapData("visitor-cities.json", 30000)])
+      .then(([history, points, cities]) => {
+        const recent = Array.isArray(cities) ? groupVisitorPoints(points, cities) : [];
+        if (recent.some(location => location.count > 0)) renderLocations(history, recent);
+        if (!markers.size) statusMessage.textContent = "No visitor locations available.";
+      });
 
     window.addEventListener("resize", () => { cityLabel.hidden = true; });
     document.addEventListener("click", (event) => {

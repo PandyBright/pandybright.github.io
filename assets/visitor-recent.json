@@ -1,0 +1,22 @@
+{
+  "capturedAt": "2026-11-23T15:44:00.913Z",
+  "locations": [
+    {"la":23.1167,"lo":113.25,"address":"Guangzhou, Guangdong, China","count":5},
+    {"la":49.2264,"lo":17.6706,"address":"Zlin, Czechia","count":4},
+    {"la":29.7048,"lo":116.0021,"address":"Jiujiang, Jiangxi, China","count":1},
+    {"la":22.284,"lo":114.1496,"address":"Mid-Levels, Hong Kong","count":8},
+    {"la":1.2897,"lo":103.8501,"address":"Singapore","count":1},
+    {"la":20.1113,"lo":77.133,"address":"Washim, India","count":1},
+    {"la":48.8592,"lo":2.3417,"address":"Paris 01 Louvre, France","count":1},
+    {"la":45.499,"lo":-73.5705,"address":"Ville-Marie, Canada","count":1},
+    {"la":43.6533,"lo":-79.3839,"address":"Toronto, Canada","count":1},
+    {"la":41.85,"lo":-87.65,"address":"Chicago, United States","count":4},
+    {"la":35.67,"lo":139.7754,"address":"Chuo, Japan","count":1},
+    {"la":47.6062,"lo":-122.3321,"address":"Seattle, United States","count":1},
+    {"la":41.8265,"lo":-72.7301,"address":"Bloomfield, United States","count":1},
+    {"la":51.4975,"lo":-0.1357,"address":"City of Westminster, United Kingdom","count":1},
+    {"la":40.7282,"lo":-74.0776,"address":"Jersey City, United States","count":1},
+    {"la":39.1422,"lo":117.1767,"address":"Tianjin, China","count":1},
+    {"la":45.75,"lo":126.65,"address":"Harbin, Heilongjiang, China","count":1}
+  ]
+}
