@@ -127,7 +127,7 @@
         button.type = "button";
         button.style.left = ((lo + 180) / 3.6) + "%";
         button.style.top = ((90 - la) / 1.8) + "%";
-        button.setAttribute("aria-label", city ? city + " (approx.)" : "City name unavailable");
+        button.setAttribute("aria-label", city || "City name unavailable");
         button.addEventListener("pointerenter", () => showCity(button));
         button.addEventListener("pointerleave", (event) => {
           if (event.pointerType !== "touch" && document.activeElement !== button) cityLabel.hidden = true;
