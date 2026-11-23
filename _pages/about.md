@@ -8,18 +8,18 @@ redirect_from:
   - /about/
   - /about.html
 ---
-I am a Research Assistant at [The Chinese University of Hong Kong (CUHK)](https://cuhk.edu.hk/). My current interests are **embodied intelligence and AIoT**. I am interested in how AI systems perceive and act in the physical world, and how AI models can connect to IoT devices for real-time interaction.
+I am a Research Assistant at [The Chinese University of Hong Kong (CUHK)](https://cuhk.edu.hk/){:target="_blank" rel="noopener noreferrer"}. My current interests are **embodied intelligence and AIoT**. I am interested in how AI systems perceive and act in the physical world, and how AI models can connect to IoT devices for real-time interaction.
 
 I am seeking a PhD position in embodied intelligence and AIoT and welcome opportunities to collaborate.
 
 <div class="home-actions">
   <a class="btn" href="{{ '/cv/' | relative_url }}">View CV</a>
-  <a href="https://drive.google.com/file/d/1JdVlDGJCUTQCpAKiZNZ2YU-L5L2U-f_A/view?usp=sharing">CV on Google Drive</a>
+  <a href="https://drive.google.com/file/d/1JdVlDGJCUTQCpAKiZNZ2YU-L5L2U-f_A/view?usp=sharing" target="_blank" rel="noopener noreferrer" aria-label="CV on Google Drive">CV</a>
 </div>
 
 ## Background
 
-I received my master's degree in Artificial Intelligence from CUHK and earned a B.Eng. in Computer Science from [Harbin Institute of Technology, Shenzhen (HITSZ)](https://www.hitsz.edu.cn/) under the supervision of Academician Fang Binxing. I was also an exchange student at the [National University of Singapore (NUS)](https://nus.edu.sg/), supervised by [Colin Tan Keng Yan](https://www.comp.nus.edu.sg/cs/people/ctank/) and [Boyd Anderson](https://www.comp.nus.edu.sg/cs/people/boyd/).
+I received my master's degree in Artificial Intelligence from CUHK and earned a B.Eng. in Computer Science from [Harbin Institute of Technology, Shenzhen (HITSZ)](https://www.hitsz.edu.cn/){:target="_blank" rel="noopener noreferrer"} under the supervision of Academician Fang Binxing. I was also an exchange student at the [National University of Singapore (NUS)](https://nus.edu.sg/){:target="_blank" rel="noopener noreferrer"}, supervised by [Colin Tan Keng Yan](https://www.comp.nus.edu.sg/cs/people/ctank/){:target="_blank" rel="noopener noreferrer"} and [Boyd Anderson](https://www.comp.nus.edu.sg/cs/people/boyd/){:target="_blank" rel="noopener noreferrer"}.
 
 My earlier research focused on the robustness of autonomous driving perception, particularly systems that combine 3D detection, segmentation, and depth estimation.
 

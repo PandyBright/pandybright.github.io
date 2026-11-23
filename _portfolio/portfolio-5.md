@@ -2,8 +2,8 @@
 title: "Taiwan"
 permalink: /photography/taiwan/
 redirect_from: /portfolio/portfolio-5/
-cover: taiwan
-cover_alt: "Colorful houses overlooking a harbor in Taiwan"
+cover: taiwan-dome-of-light
+cover_alt: "The Dome of Light in Kaohsiung, with a stained-glass ceiling and illuminated columns"
 excerpt: >
   <a href="https://maps.apple.com/?q=Taiwan" target="_blank" rel="noopener noreferrer">📍 Taiwan</a>
 collection: portfolio
