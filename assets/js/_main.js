@@ -133,8 +133,8 @@ $(document).ready(function () {
     }
   });
 
-  // Init smooth scroll, this needs to be slightly more than then fixed masthead height
-  $("a").smoothScroll({
+  // Section navigation uses native fragment scrolling and CSS scroll margins.
+  $("a").not(".page-jump-links a").smoothScroll({
     offset: -scssMastheadHeight,
     preventDefault: false,
   });
