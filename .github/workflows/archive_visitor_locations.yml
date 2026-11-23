@@ -2,7 +2,7 @@ name: Archive visitor map locations
 
 on:
   schedule:
-    - cron: '12,42 * * * *'
+    - cron: '3-58/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -40,9 +40,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           published=$(mktemp)
-          if [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ] &&
-             curl --fail --silent --show-error --max-time 15 "https://pandybright.github.io/assets/visitor-history.json?v=${GITHUB_RUN_ID}" -o "$published" &&
+          if curl --fail --silent --show-error --max-time 15 "https://pandybright.github.io/assets/visitor-history.json?v=${GITHUB_RUN_ID}" -o "$published" &&
              cmp -s "$published" assets/visitor-history.json; then
+            exit 0
+          fi
+          revision=$(git rev-parse HEAD)
+          if gh api "repos/${GITHUB_REPOSITORY}/pages/builds?per_page=5" --jq '.[] | select(.status == "queued" or .status == "building" or .status == "built") | .commit' | grep -Fx "$revision"; then
             exit 0
           fi
           gh api --method POST "repos/${GITHUB_REPOSITORY}/pages/builds" --jq .status
