@@ -34,7 +34,7 @@ def parse_markdown_cv(md_file):
     section_content = []
     
     for line in content.split('\n'):
-        if re.match(r'^=+$', line):
+        if re.match(r'^(?:=+|-+)$', line):
             continue
         
         section_match = re.match(r'^([A-Za-z\s]+)$', line.strip())

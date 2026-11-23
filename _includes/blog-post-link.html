@@ -1,0 +1,9 @@
+{% assign article = include.post %}
+<li>
+  {% if article.link %}
+    <a href="{{ article.link | escape }}" target="_blank" rel="noopener noreferrer" lang="zh-Hans">{{ article.title | strip | escape }}</a>
+  {% else %}
+    <a href="{{ article.url | relative_url }}">{{ article.title | strip | escape }}</a>
+  {% endif %}
+  <time datetime="{{ article.date | date: '%Y-%m-%d' }}">{{ article.date | date: '%b %d, %Y' }}</time>
+</li>

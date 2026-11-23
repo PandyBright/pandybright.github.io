@@ -1,0 +1,10 @@
+- id: robotics-and-foundation-models
+  name: Robotics & Foundation Models
+- id: computer-vision
+  name: Computer Vision
+- id: deep-learning
+  name: Deep Learning
+- id: machine-learning
+  name: Machine Learning
+- id: systems-and-tools
+  name: Systems & Tools
