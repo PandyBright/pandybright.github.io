@@ -15,14 +15,13 @@ I am seeking a PhD position in embodied intelligence and AIoT and welcome opport
 <div class="home-actions">
   <a class="btn" href="{{ '/cv/' | relative_url }}">View CV</a>
   <a href="https://drive.google.com/file/d/1JdVlDGJCUTQCpAKiZNZ2YU-L5L2U-f_A/view?usp=sharing">CV on Google Drive</a>
-  <a href="mailto:{{ site.author.email }}">Email</a>
 </div>
 
 ## Background
 
-My earlier research focused on the robustness of autonomous driving perception, particularly systems that combine 3D detection, segmentation, and depth estimation.
-
 I received my master's degree in Artificial Intelligence from CUHK and earned a B.Eng. in Computer Science from [Harbin Institute of Technology, Shenzhen (HITSZ)](https://www.hitsz.edu.cn/) under the supervision of Academician Fang Binxing. I was also an exchange student at the [National University of Singapore (NUS)](https://nus.edu.sg/), supervised by [Colin Tan Keng Yan](https://www.comp.nus.edu.sg/cs/people/ctank/) and [Boyd Anderson](https://www.comp.nus.edu.sg/cs/people/boyd/).
+
+My earlier research focused on the robustness of autonomous driving perception, particularly systems that combine 3D detection, segmentation, and depth estimation.
 
 ## Recent Updates {#news}
 
