@@ -113,25 +113,31 @@
       const center = marker.left + marker.width / 2;
       const left = Math.max(4, Math.min(center - cityLabel.offsetWidth / 2, innerWidth - cityLabel.offsetWidth - 4));
       const above = marker.top - cityLabel.offsetHeight - 1;
+      const top = above < 4 ? marker.bottom + 1 : above;
       cityLabel.style.left = left + "px";
-      cityLabel.style.top = (above < 4 ? marker.bottom + 1 : above) + "px";
+      cityLabel.style.top = Math.max(4, Math.min(top, innerHeight - cityLabel.offsetHeight - 4)) + "px";
     }
 
     function labelPoints(visitorPoints, cities) {
-      const locations = new Set();
-      for (const { la, lo } of visitorPoints) {
+      const locations = new Map();
+      for (const point of visitorPoints) {
+        const { la, lo } = point ?? {};
         if (!Number.isFinite(la) || !Number.isFinite(lo) || Math.abs(la) > 90 || Math.abs(lo) > 180) continue;
-        const key = la + "," + lo;
-        if (locations.has(key)) continue;
-        locations.add(key);
-
         const city = nearbyCity(la, lo, cities);
+        const key = city || `${la},${lo}`;
+        const location = locations.get(key);
+        if (location) location.count += 1;
+        else locations.set(key, { la, lo, city, count: 1 });
+      }
+
+      for (const { la, lo, city, count } of locations.values()) {
         const button = document.createElement("button");
         button.className = "map-point";
         button.type = "button";
         button.style.left = ((lo + 180) / 3.6) + "%";
         button.style.top = ((90 - la) / 1.8) + "%";
-        button.setAttribute("aria-label", city || "City name unavailable");
+        const visits = count === 1 ? "1 recent visit" : `${count} recent visits`;
+        button.setAttribute("aria-label", `${visits} from ${city || "an unknown location"}`);
         button.addEventListener("pointerenter", () => showCity(button));
         button.addEventListener("pointerleave", (event) => {
           if (event.pointerType !== "touch" && document.activeElement !== button) cityLabel.hidden = true;
