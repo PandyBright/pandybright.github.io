@@ -2,8 +2,8 @@
 title: "Taiwan"
 permalink: /photography/taiwan/
 redirect_from: /portfolio/portfolio-5/
-cover: taiwan-dome-of-light
-cover_alt: "The Dome of Light in Kaohsiung, with a stained-glass ceiling and illuminated columns"
+cover: taiwan-liberty-square
+cover_alt: "The Liberty Square Arch in Taipei beneath a streaked blue sky, with sunlight entering from the left"
 excerpt: >
   <a href="https://maps.apple.com/?q=Taiwan" target="_blank" rel="noopener noreferrer">📍 Taiwan</a>
 collection: portfolio
