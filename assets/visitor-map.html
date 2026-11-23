@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://service.supercounters.com; img-src 'self' https://pandybright.github.io; connect-src 'self' https://pandybright.github.io; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'self' https://pandybright.github.io https://service.supercounters.com; img-src 'self' https://pandybright.github.io; connect-src 'self' https://pandybright.github.io; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
   <title>Visitor Map</title>
   <style>
     body { margin: 0; overflow: hidden; color-scheme: light dark; font: 14px system-ui, sans-serif; }
@@ -66,46 +66,13 @@
   <p id="status" role="status">Loading visitor points…</p>
   <div id="points" role="group" aria-label="Visitor locations"></div>
   <div id="city-label" aria-hidden="true" hidden></div>
+  <script src="./visitor-locations.js"></script>
   <script>
     var sc_map_var = [];
 
     const statusMessage = document.querySelector("#status");
     const pointLayer = document.querySelector("#points");
     const cityLabel = document.querySelector("#city-label");
-    const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
-
-    function nearbyCity(latitude, longitude, cities) {
-      const maxOffset = 0.32;
-      const hongKongLocalityOffset = 0.045;
-      const radians = Math.PI / 180;
-      let bestDistance = maxOffset ** 2;
-      let nearest;
-
-      // Coordinates come from IP-based geolocation. Skip distant city matches.
-      for (const entry of cities) {
-        const [lat, lon] = entry;
-        const latitudeOffset = latitude - lat;
-        if (latitudeOffset > maxOffset) continue;
-        if (latitudeOffset < -maxOffset) break;
-        const longitudeOffset = ((longitude - lon + 540) % 360 - 180) * Math.cos((latitude + lat) * radians / 2);
-        const distance = latitudeOffset ** 2 + longitudeOffset ** 2;
-        if (entry[3] === "HK" && distance > hongKongLocalityOffset ** 2) continue;
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          nearest = entry;
-        }
-      }
-      if (!nearest) return;
-      const [, , city, countryCode, area] = nearest;
-      if (countryCode === "HK") {
-        if (!area) return "Hong Kong";
-        if (area === "Hong Kong Island") return city + ", Hong Kong";
-        return [city, area, "Hong Kong"].join(", ");
-      }
-      const region = regionNames.of(countryCode);
-      return [...new Set([city, area, region].filter(Boolean))].join(", ");
-    }
-
     function showCity(button) {
       cityLabel.textContent = button.getAttribute("aria-label");
       cityLabel.hidden = false;
@@ -118,23 +85,25 @@
       cityLabel.style.top = Math.max(4, Math.min(top, innerHeight - cityLabel.offsetHeight - 4)) + "px";
     }
 
-    function labelPoints(visitorPoints, cities) {
-      const locations = new Map();
-      for (const point of visitorPoints) {
-        const { la, lo } = point ?? {};
-        if (!Number.isFinite(la) || !Number.isFinite(lo) || Math.abs(la) > 90 || Math.abs(lo) > 180) continue;
-        const city = nearbyCity(la, lo, cities);
-        const key = city || `${la},${lo}`;
-        if (!locations.has(key)) locations.set(key, { la, lo, city });
+    function labelPoints(recentPoints, history, cities) {
+      const locations = new Map(history.map(location => [visitorLocationKey(location), { ...location, count: 0 }]));
+      for (const [index, point] of recentPoints.entries()) {
+        const location = resolveVisitorLocation(point, cities);
+        if (!location) continue;
+        const key = visitorLocationKey(location);
+        const count = (locations.get(key)?.count ?? 0) + (index < 50 ? 1 : 0);
+        locations.set(key, { ...location, count });
       }
 
-      for (const { la, lo, city } of locations.values()) {
+      for (const { la, lo, address, count } of locations.values()) {
         const button = document.createElement("button");
         button.className = "map-point";
         button.type = "button";
         button.style.left = ((lo + 180) / 3.6) + "%";
         button.style.top = ((90 - la) / 1.8) + "%";
-        button.setAttribute("aria-label", city || "City name unavailable");
+        const visits = count === 1 ? "1 visit" : `${count} visits`;
+        const label = count ? `${visits} from ${address || "an unknown location"}` : (address || "Unknown location");
+        button.setAttribute("aria-label", label);
         button.addEventListener("pointerenter", () => showCity(button));
         button.addEventListener("pointerleave", (event) => {
           if (event.pointerType !== "touch" && document.activeElement !== button) cityLabel.hidden = true;
@@ -148,42 +117,45 @@
       else statusMessage.textContent = "No visitor locations available.";
     }
 
-    const timeout = setTimeout(() => { statusMessage.textContent = "Visitor points unavailable."; }, 8000);
-    // Supercounters returns coordinates through this callback.
-    window.sc_show_map = async (id, payload) => {
-      if (id !== 1741601 || typeof payload !== "string") return;
-      let points;
+    async function fetchMapData(filename) {
       try {
-        points = JSON.parse(payload.slice(1, -1));
-      } catch {
-        return;
-      }
-      if (!Array.isArray(points)) return;
+        const response = await fetch(`./${filename}${window.location.search}`, {
+          credentials: "omit",
+          signal: AbortSignal.timeout(5000)
+        });
+        const data = response.ok ? await response.json() : null;
+        if (Array.isArray(data)) return data;
+      } catch { /* The other map data sources can still be displayed. */ }
+      return [];
+    }
 
-      let cities = [];
-      if (points.length) {
-        try {
-          // City names, centroids and provinces are adapted from GeoNames (CC BY 4.0).
-          const response = await fetch("./visitor-cities.json" + window.location.search, {
-            credentials: "omit",
-            signal: AbortSignal.timeout(5000)
-          });
-          if (response.ok) cities = await response.json();
-        } catch {
-          // Show the point even if its city name could not be loaded.
-        }
-      }
-      clearTimeout(timeout);
-      labelPoints(points, cities);
-    };
+    function fetchRecentPoints() {
+      return new Promise(resolve => {
+        const timeout = setTimeout(() => resolve([]), 6500);
+        // Supercounters sends the newest coordinates through this callback.
+        window.sc_show_map = (id, payload) => {
+          if (id !== 1741601 || typeof payload !== "string") return;
+          clearTimeout(timeout);
+          try {
+            const points = JSON.parse(payload.slice(1, -1));
+            resolve(Array.isArray(points) ? points : []);
+          } catch {
+            resolve([]);
+          }
+        };
+        const counter = document.createElement("script");
+        counter.src = "https://service.supercounters.com/fc.php?id=1741601&w=4&rand=" + Date.now();
+        counter.addEventListener("error", () => {
+          clearTimeout(timeout);
+          resolve([]);
+        });
+        document.head.append(counter);
+      });
+    }
 
-    const counter = document.createElement("script");
-    counter.src = "https://service.supercounters.com/fc.php?id=1741601&w=4&rand=" + Date.now();
-    counter.addEventListener("error", () => {
-      clearTimeout(timeout);
-      statusMessage.textContent = "Visitor points unavailable.";
-    });
-    document.head.append(counter);
+    // City names, centroids and provinces are adapted from GeoNames (CC BY 4.0).
+    Promise.all([fetchRecentPoints(), fetchMapData("visitor-history.json"), fetchMapData("visitor-cities.json")])
+      .then(([recentPoints, history, cities]) => labelPoints(recentPoints, history, cities));
 
     window.addEventListener("resize", () => { cityLabel.hidden = true; });
     document.addEventListener("click", (event) => {
