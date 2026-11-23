@@ -1,10 +1,15 @@
 - id: robotics-and-foundation-models
   name: Robotics & Foundation Models
+  icon: robot
 - id: computer-vision
   name: Computer Vision
+  icon: eye
 - id: deep-learning
   name: Deep Learning
+  icon: layer-group
 - id: machine-learning
   name: Machine Learning
+  icon: chart-line
 - id: systems-and-tools
   name: Systems & Tools
+  icon: terminal

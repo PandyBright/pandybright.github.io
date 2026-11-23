@@ -17,7 +17,7 @@ redirect_from:
   <nav class="page-jump-links" aria-label="Blog topics">
     <ul>
       {% for topic in topics %}
-        <li><a href="#{{ topic.id }}">{{ topic.name }}</a></li>
+        <li><a href="#{{ topic.id }}"><i class="fas fa-{{ topic.icon }}" aria-hidden="true"></i> {{ topic.name }}</a></li>
       {% endfor %}
       {% if unclassified.size > 0 %}<li><a href="#other-posts">Other posts</a></li>{% endif %}
     </ul>
@@ -25,7 +25,7 @@ redirect_from:
 
   {% if featured.size > 0 %}
     <section aria-labelledby="featured-posts">
-      <h2 id="featured-posts">Recommended reading</h2>
+      <h2 id="featured-posts"><i class="fas fa-bookmark" aria-hidden="true"></i> Recommended reading</h2>
       <ul class="blog-posts blog-posts--featured">
         {% for post in featured %}
           {% include blog-post-link.html post=post %}
@@ -38,7 +38,7 @@ redirect_from:
     {% assign posts = site.posts | where: 'topic', topic.id %}
     {% if posts.size > 0 %}
       <section aria-labelledby="{{ topic.id }}">
-        <h2 id="{{ topic.id }}">{{ topic.name }}</h2>
+        <h2 id="{{ topic.id }}"><i class="fas fa-{{ topic.icon }}" aria-hidden="true"></i> {{ topic.name }}</h2>
         <ul class="blog-posts">
           {% for post in posts %}
             {% include blog-post-link.html post=post %}

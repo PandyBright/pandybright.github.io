@@ -1,9 +1,8 @@
 {% assign article = include.post %}
 <li>
-  {% if article.link %}
-    <a href="{{ article.link | escape }}" target="_blank" rel="noopener noreferrer" lang="zh-Hans">{{ article.title | strip | escape }}</a>
-  {% else %}
-    <a href="{{ article.url | relative_url }}">{{ article.title | strip | escape }}</a>
-  {% endif %}
-  <time datetime="{{ article.date | date: '%Y-%m-%d' }}">{{ article.date | date: '%b %d, %Y' }}</time>
+  <a href="{% if article.link %}{{ article.link | escape }}{% else %}{{ article.url | relative_url }}{% endif %}"{% if article.link %} target="_blank" rel="noopener noreferrer"{% endif %}>
+    <span class="blog-posts__title"{% if article.link %} lang="zh-Hans"{% endif %}>{{ article.title | strip | escape }}</span>
+    <time datetime="{{ article.date | date: '%Y-%m-%d' }}">{{ article.date | date: '%b %d, %Y' }}</time>
+    <span class="blog-posts__arrow" aria-hidden="true">{% if article.link %}↗{% else %}→{% endif %}</span>
+  </a>
 </li>
