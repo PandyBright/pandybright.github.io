@@ -97,7 +97,11 @@
       }
       if (!nearest) return;
       const [, , city, countryCode, area] = nearest;
-      if (countryCode === "HK") return area ? [city, area, "Hong Kong"].join(", ") : "Hong Kong";
+      if (countryCode === "HK") {
+        if (!area) return "Hong Kong";
+        if (area === "Hong Kong Island") return city + ", Hong Kong";
+        return [city, area, "Hong Kong"].join(", ");
+      }
       const region = area || regionNames.of(countryCode);
       return region === city ? city : city + ", " + region;
     }
