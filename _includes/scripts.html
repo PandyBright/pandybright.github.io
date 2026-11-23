@@ -1,6 +1,4 @@
 <script type="module" src="{{ base_path }}/assets/js/main.min.js"></script>
-{% if page.url == '/' or page.url == '/cv/' or page.url == '/year-archive/' or page.collection == 'portfolio' %}
-  <script type="module" src="{{ '/assets/js/site-effects.js' | relative_url }}"></script>
-{% endif %}
+<script type="module" src="{{ '/assets/js/site-effects.js' | relative_url }}"></script>
 
 {% include analytics.html %}

@@ -18,10 +18,6 @@ redirect_from:
       <a href="https://drive.google.com/file/d/1JdVlDGJCUTQCpAKiZNZ2YU-L5L2U-f_A/view?usp=sharing" target="_blank" rel="noopener noreferrer" aria-label="CV on Google Drive">CV <span aria-hidden="true">↗</span></a>
     </div>
   </div>
-  <div class="home-intro__art" aria-hidden="true">
-    <span class="home-intro__orbit"></span>
-    <span class="home-intro__core"></span>
-  </div>
 </div>
 
 ## Background

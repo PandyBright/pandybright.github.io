@@ -12,10 +12,22 @@
 <div itemscope itemtype="http://schema.org/Person">
 
   <div class="author__avatar">
+    {% capture avatar %}
     {% if author.avatar contains "://" %}
     	<img src="{{ author.avatar }}" alt="{{ author.name }}"  fetchpriority="high" />
     {% else %}
     	<img src="{{ author.avatar | prepend: "/images/" | prepend: base_path }}" class="author__avatar" alt="{{ author.name }}"  fetchpriority="high" />
+    {% endif %}
+    {% endcapture %}
+    {% if page.url == '/' %}
+      <details class="avatar-mascot">
+        <summary aria-label="Say hello to the mascot" title="Say hello">
+          {{ avatar }}
+        </summary>
+        <p class="avatar-mascot__greeting">You found me! <span aria-hidden="true">✦</span></p>
+      </details>
+    {% else %}
+      {{ avatar }}
     {% endif %}
   </div>
 
