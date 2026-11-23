@@ -102,8 +102,8 @@
         if (area === "Hong Kong Island") return city + ", Hong Kong";
         return [city, area, "Hong Kong"].join(", ");
       }
-      const region = area || regionNames.of(countryCode);
-      return region === city ? city : city + ", " + region;
+      const region = regionNames.of(countryCode);
+      return [...new Set([city, area, region].filter(Boolean))].join(", ");
     }
 
     function showCity(button) {
