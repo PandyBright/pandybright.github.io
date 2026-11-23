@@ -80,15 +80,8 @@ html[data-theme="dark"] {
 
 .visitor-map {
   width: 100%;
-  max-width: 19rem;
-  margin-top: 0.95rem;
+  max-width: 32rem;
   font-size: 0.8rem;
-
-  h2 {
-    margin: 0 0 0.45rem;
-    font-size: 0.95rem;
-    scroll-margin-top: calc(#{$masthead-height} + 1rem);
-  }
 
   a {
     color: var(--site-accent-strong);
