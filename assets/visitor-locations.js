@@ -25,7 +25,7 @@ function resolveVisitorLocation(point, cities) {
     }
   }
 
-  if (!nearest) return { la: Math.round(la * 10) / 10, lo: Math.round(lo * 10) / 10 };
+  if (!nearest) return;
 
   const [latitude, longitude, city, countryCode, area] = nearest;
   let address;
@@ -41,7 +41,7 @@ function resolveVisitorLocation(point, cities) {
 }
 
 function visitorLocationKey({ la, lo, address }) {
-  return `${la},${lo},${address || ""}`;
+  return `${la},${lo},${address}`;
 }
 
 if (typeof module !== "undefined") module.exports = { resolveVisitorLocation, visitorLocationKey };

@@ -6,30 +6,35 @@ const cities = require("../assets/visitor-cities.json");
 const archivePath = path.join(__dirname, "../assets/visitor-history.json");
 
 async function updateArchive() {
-  const source = new URL("https://service.supercounters.com/fc.php?id=1741601&w=4");
-  source.searchParams.set("rand", Date.now());
+  // The widget endpoint records a visit. Use the report's read-only feed to archive map locations.
+  const source = new URL("https://www.supercounters.com/ajax-live-map/1741601");
+  source.searchParams.set("_", Date.now());
   const response = await fetch(source, {
     headers: { "User-Agent": "PandyBrightVisitorArchive/1.0 (bot)" },
     signal: AbortSignal.timeout(12000)
   });
   if (!response.ok) throw new Error(`Visitor map returned HTTP ${response.status}`);
 
-  const payload = (await response.text()).match(/sc_show_map\(\s*1741601\s*,\s*["']\((\[.*?\])\)["']/s);
-  if (!payload) throw new Error("Visitor map returned an unexpected response");
+  const points = await response.json();
+  if (!Array.isArray(points)) throw new Error("Visitor map returned an unexpected response");
 
   const archive = JSON.parse(fs.readFileSync(archivePath, "utf8"));
-  const locations = new Map(archive.map(location => [visitorLocationKey(location), location]));
-  for (const point of JSON.parse(payload[1])) {
-    const location = resolveVisitorLocation(point, cities);
+  const locations = new Map(archive.filter(location => location.address)
+    .map(location => [visitorLocationKey(location), location]));
+  for (const point of points) {
+    const latLng = point?.latLng;
+    if (!Array.isArray(latLng)) continue;
+    const [la, lo] = latLng;
+    const location = resolveVisitorLocation({ la, lo }, cities);
     if (location) locations.set(visitorLocationKey(location), location);
   }
 
-  const newLocations = locations.size - archive.length;
-  if (newLocations > 0) {
-    const entries = [...locations.values()].map(location => `  ${JSON.stringify(location)}`);
-    fs.writeFileSync(archivePath, `[\n${entries.join(",\n")}\n]\n`);
+  const entries = [...locations.values()];
+  if (JSON.stringify(entries) !== JSON.stringify(archive)) {
+    const lines = entries.map(location => `  ${JSON.stringify(location)}`);
+    fs.writeFileSync(archivePath, `[\n${lines.join(",\n")}\n]\n`);
   }
-  console.log(`Archived ${newLocations} additional locations (${locations.size} total).`);
+  console.log(`Location archive contains ${entries.length} places.`);
 }
 
 updateArchive().catch(error => {
