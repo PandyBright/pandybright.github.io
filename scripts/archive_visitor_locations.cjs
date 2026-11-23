@@ -10,10 +10,18 @@ async function updateArchive() {
   const source = new URL("https://www.supercounters.com/ajax-live-map/1741601");
   source.searchParams.set("_", Date.now());
   const response = await fetch(source, {
-    headers: { "User-Agent": "PandyBrightVisitorArchive/1.0 (bot)" },
+    headers: {
+      "Accept": "application/json",
+      "Referer": "https://www.supercounters.com/map/1741601",
+      "X-Requested-With": "XMLHttpRequest",
+      "User-Agent": "PandyBrightVisitorArchive/1.0 (bot)"
+    },
     signal: AbortSignal.timeout(12000)
   });
-  if (!response.ok) throw new Error(`Visitor map returned HTTP ${response.status}`);
+  if (!response.ok) {
+    const challenge = response.headers.get("cf-mitigated") === "challenge" ? " (Cloudflare challenge)" : "";
+    throw new Error(`Visitor map returned HTTP ${response.status}${challenge}`);
+  }
 
   const points = await response.json();
   if (!Array.isArray(points)) throw new Error("Visitor map returned an unexpected response");
