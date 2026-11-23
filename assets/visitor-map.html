@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://widget.supercounters.com https://service.supercounters.com; img-src 'self' https://pandybright.github.io; connect-src 'self' https://pandybright.github.io; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://service.supercounters.com; img-src 'self' https://pandybright.github.io; connect-src 'self' https://pandybright.github.io; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
   <title>Visitor Map</title>
   <style>
     body { margin: 0; overflow: hidden; color-scheme: light dark; font: 14px system-ui, sans-serif; }
@@ -140,39 +140,36 @@
     }
 
     const timeout = setTimeout(() => { statusMessage.textContent = "Visitor points unavailable."; }, 8000);
-    const counter = document.createElement("script");
-    counter.src = "https://widget.supercounters.com/ssl/map.js";
-    counter.addEventListener("load", () => {
-      if (typeof sc_map !== "function") return;
-      // The counter response has coordinates only. Render them on the on-site basemap.
-      window.sc_show_map = async (id, payload) => {
-        if (id !== 1741601 || typeof payload !== "string") return;
-        let points;
-        try {
-          points = JSON.parse(payload.slice(1, -1));
-        } catch {
-          return;
-        }
-        if (!Array.isArray(points)) return;
+    // Supercounters returns coordinates through this callback.
+    window.sc_show_map = async (id, payload) => {
+      if (id !== 1741601 || typeof payload !== "string") return;
+      let points;
+      try {
+        points = JSON.parse(payload.slice(1, -1));
+      } catch {
+        return;
+      }
+      if (!Array.isArray(points)) return;
 
-        let cities = [];
-        if (points.length) {
-          try {
-            // City names, centroids and provinces are adapted from GeoNames (CC BY 4.0).
-            const response = await fetch("./visitor-cities.json", {
-              credentials: "omit",
-              signal: AbortSignal.timeout(5000)
-            });
-            if (response.ok) cities = await response.json();
-          } catch {
-            // Show the point even if its city name could not be loaded.
-          }
+      let cities = [];
+      if (points.length) {
+        try {
+          // City names, centroids and provinces are adapted from GeoNames (CC BY 4.0).
+          const response = await fetch("./visitor-cities.json", {
+            credentials: "omit",
+            signal: AbortSignal.timeout(5000)
+          });
+          if (response.ok) cities = await response.json();
+        } catch {
+          // Show the point even if its city name could not be loaded.
         }
-        clearTimeout(timeout);
-        labelPoints(points, cities);
-      };
-      sc_map(1741601, "112288", "ff0000", 1);
-    });
+      }
+      clearTimeout(timeout);
+      labelPoints(points, cities);
+    };
+
+    const counter = document.createElement("script");
+    counter.src = "https://service.supercounters.com/fc.php?id=1741601&w=4&rand=" + Date.now();
     counter.addEventListener("error", () => {
       clearTimeout(timeout);
       statusMessage.textContent = "Visitor points unavailable.";
