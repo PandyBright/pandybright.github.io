@@ -76,6 +76,7 @@
 
     function nearbyCity(latitude, longitude, cities) {
       const maxOffset = 0.32;
+      const hongKongLocalityOffset = 0.045;
       const radians = Math.PI / 180;
       let bestDistance = maxOffset ** 2;
       let nearest;
@@ -88,15 +89,16 @@
         if (latitudeOffset < -maxOffset) break;
         const longitudeOffset = ((longitude - lon + 540) % 360 - 180) * Math.cos((latitude + lat) * radians / 2);
         const distance = latitudeOffset ** 2 + longitudeOffset ** 2;
+        if (entry[3] === "HK" && distance > hongKongLocalityOffset ** 2) continue;
         if (distance < bestDistance) {
           bestDistance = distance;
           nearest = entry;
         }
       }
       if (!nearest) return;
-      const [, , city, countryCode, province] = nearest;
-      if (countryCode === "HK") return "Hong Kong · 香港";
-      const region = province || regionNames.of(countryCode);
+      const [, , city, countryCode, area] = nearest;
+      if (countryCode === "HK") return area ? [city, area, "Hong Kong"].join(", ") : "Hong Kong";
+      const region = area || regionNames.of(countryCode);
       return region === city ? city : city + ", " + region;
     }
 
@@ -155,7 +157,7 @@
       if (points.length) {
         try {
           // City names, centroids and provinces are adapted from GeoNames (CC BY 4.0).
-          const response = await fetch("./visitor-cities.json", {
+          const response = await fetch("./visitor-cities.json" + window.location.search, {
             credentials: "omit",
             signal: AbortSignal.timeout(5000)
           });
