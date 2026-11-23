@@ -3,5 +3,8 @@
   {"la":39.1422,"lo":117.1767,"address":"Tianjin, China"},
   {"la":23.1167,"lo":113.25,"address":"Guangzhou, Guangdong, China"},
   {"la":45.75,"lo":126.65,"address":"Harbin, Heilongjiang, China"},
-  {"la":41.85,"lo":-87.65,"address":"Chicago, United States"}
+  {"la":41.85,"lo":-87.65,"address":"Chicago, United States"},
+  {"la":40.7282,"lo":-74.0776,"address":"Jersey City, United States"},
+  {"la":51.4975,"lo":-0.1357,"address":"City of Westminster, United Kingdom"},
+  {"la":41.8265,"lo":-72.7301,"address":"Bloomfield, United States"}
 ]
