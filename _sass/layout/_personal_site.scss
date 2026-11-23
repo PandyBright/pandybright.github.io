@@ -20,7 +20,7 @@ html[data-theme="dark"] {
 
 @media (hover: hover) and (pointer: fine) {
   body {
-    cursor: url("../cursors/ink-arrow.png") 4 3, auto;
+    cursor: url("../cursors/pixel-arrow.png") 4 4, auto;
   }
 
   p,
@@ -35,7 +35,7 @@ html[data-theme="dark"] {
 
   body :is(a[href], button:not(:disabled), summary, label[for]),
   #theme-toggle a {
-    cursor: url("../cursors/ink-hand.png") 10 3, pointer;
+    cursor: url("../cursors/pixel-pointer.png") 12 4, pointer;
   }
 }
 
@@ -80,19 +80,14 @@ html[data-theme="dark"] {
 
 .visitor-map {
   display: block;
-  width: min(100%, 13rem);
-  margin-top: 0.75rem;
-  padding: 0.35rem;
-  border: 1px solid var(--global-border-color);
-  border-radius: 0.55rem;
   color: var(--site-accent-strong);
-  background: var(--site-accent-soft);
   text-decoration: none;
 
   &:hover,
   &:focus-visible {
-    border-color: var(--site-art-ink);
     color: var(--site-accent-strong);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
 
   img {
@@ -101,9 +96,8 @@ html[data-theme="dark"] {
 }
 
 .visitor-map__label {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.05rem 0.25rem 0.35rem;
+  display: block;
+  margin-bottom: 0.3rem;
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -286,13 +280,6 @@ html[data-theme="dark"] {
 }
 
 .home-background {
-  padding: clamp(1rem, 3vw, 1.65rem);
-  border: 1px solid var(--global-border-color);
-  border-radius: 1rem;
-  background:
-    radial-gradient(ellipse at bottom right, var(--site-violet-soft), transparent 50%),
-    var(--global-bg-color);
-
   > p:last-child {
     margin-bottom: 0;
   }
