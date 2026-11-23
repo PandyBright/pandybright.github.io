@@ -8,18 +8,6 @@ redirect_from:
   - /resume
 ---
 
-<nav class="page-jump-links" aria-label="CV sections">
-  <ul>
-    <li><a href="#education">Education</a></li>
-    <li><a href="#patents">Patents</a></li>
-    <li><a href="#work-experience">Experience</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#awards">Awards</a></li>
-    <li><a href="#technical-skills">Skills</a></li>
-    <li><a href="#academic-service">Service</a></li>
-  </ul>
-</nav>
-
 Education
 ---------
 <div class="cv-entry">

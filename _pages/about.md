@@ -8,13 +8,20 @@ redirect_from:
   - /about/
   - /about.html
 ---
-I am a Research Assistant at [The Chinese University of Hong Kong (CUHK)](https://cuhk.edu.hk/){:target="_blank" rel="noopener noreferrer"}. My current interests are **embodied intelligence and AIoT**. I am interested in how AI systems perceive and act in the physical world, and how AI models can connect to IoT devices for real-time interaction.
+<div class="home-intro" data-spotlight>
+  <div class="home-intro__copy">
+    <p>I am a Research Assistant at <a href="https://cuhk.edu.hk/" target="_blank" rel="noopener noreferrer">The Chinese University of Hong Kong (CUHK)</a>. My current interests are <strong>embodied intelligence and AIoT</strong>. I am interested in how AI systems perceive and act in the physical world, and how AI models can connect to IoT devices for real-time interaction.</p>
+    <p>I am seeking a PhD position in embodied intelligence and AIoT and welcome opportunities to collaborate.</p>
 
-I am seeking a PhD position in embodied intelligence and AIoT and welcome opportunities to collaborate.
-
-<div class="home-actions">
-  <a class="btn" href="{{ '/cv/' | relative_url }}">View CV</a>
-  <a href="https://drive.google.com/file/d/1JdVlDGJCUTQCpAKiZNZ2YU-L5L2U-f_A/view?usp=sharing" target="_blank" rel="noopener noreferrer" aria-label="CV on Google Drive">CV</a>
+    <div class="home-actions">
+      <a class="btn" href="{{ '/cv/' | relative_url }}">View CV</a>
+      <a href="https://drive.google.com/file/d/1JdVlDGJCUTQCpAKiZNZ2YU-L5L2U-f_A/view?usp=sharing" target="_blank" rel="noopener noreferrer" aria-label="CV on Google Drive">CV <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+  <div class="home-intro__art" aria-hidden="true">
+    <span class="home-intro__orbit"></span>
+    <span class="home-intro__core"></span>
+  </div>
 </div>
 
 ## Background

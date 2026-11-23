@@ -13,16 +13,19 @@ redirect_from:
     {% assign cover = album.cover | prepend: '/images/photography/' %}
     <article class="photo-album">
       <a href="{{ album.url | relative_url }}" aria-labelledby="album-{{ forloop.index }}">
-        <img class="photo-album__cover"
-             src="{{ cover | append: '-480.webp' | relative_url }}"
-             srcset="{{ cover | append: '-480.webp' | relative_url }} 480w, {{ cover | append: '-960.webp' | relative_url }} 960w"
-             sizes="(min-width: 1024px) 30vw, (min-width: 600px) 46vw, calc(100vw - 2rem)"
-             width="960" height="640" decoding="async"
-             {% unless forloop.first %}loading="lazy"{% endunless %}
-             alt="{{ album.cover_alt | escape }}">
+        <div class="photo-album__frame">
+          <img class="photo-album__cover"
+               src="{{ cover | append: '-480.webp' | relative_url }}"
+               srcset="{{ cover | append: '-480.webp' | relative_url }} 480w, {{ cover | append: '-960.webp' | relative_url }} 960w"
+               sizes="(min-width: 1024px) 30vw, (min-width: 600px) 46vw, calc(100vw - 2rem)"
+               width="960" height="640" decoding="async"
+               {% unless forloop.first %}loading="lazy"{% endunless %}
+               alt="{{ album.cover_alt | escape }}">
+        </div>
         <div class="photo-album__label">
           <h2 id="album-{{ forloop.index }}">{{ album.title | escape }}</h2>
           {% if album.location %}<p>{{ album.location | escape }}</p>{% endif %}
+          <span class="photo-album__arrow" aria-hidden="true">→</span>
         </div>
       </a>
     </article>
