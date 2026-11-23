@@ -5,13 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' https://widget.supercounters.com https://service.supercounters.com; img-src https://widget.supercounters.com https://s05.flagcounter.com; connect-src 'self' https://pandybright.github.io; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://widget.supercounters.com https://service.supercounters.com; img-src 'self' https://pandybright.github.io; connect-src 'self' https://pandybright.github.io; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
   <title>Visitor Map</title>
   <style>
     body { margin: 0; overflow: hidden; color-scheme: light dark; font: 14px system-ui, sans-serif; }
-    #map { width: 420px; transform-origin: top left; pointer-events: none; }
-    #status { margin: 0; padding: 0.6rem 0; }
-    #status img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+    #map { display: block; width: 100%; height: auto; }
+    #status {
+      position: absolute;
+      inset: auto 0.25rem 0.25rem;
+      margin: 0;
+      color: #293b59;
+      text-align: center;
+      font-size: 0.75rem;
+    }
     #points { position: absolute; inset: 0; pointer-events: none; }
     .map-point {
       position: absolute;
@@ -41,6 +47,7 @@
     }
     #city-label {
       position: absolute;
+      width: max-content;
       max-width: calc(100% - 8px);
       box-sizing: border-box;
       padding: 0.28rem 0.45rem;
@@ -55,26 +62,17 @@
   </style>
 </head>
 <body>
-  <p id="status">Loading visitor map…</p>
-  <div id="map">
-    <script src="https://widget.supercounters.com/ssl/map.js" defer></script>
-  </div>
+  <img id="map" src="./visitor-world.png" alt="World map" width="640" height="320">
+  <p id="status" role="status">Loading visitor points…</p>
   <div id="points" role="group" aria-label="Visitor locations"></div>
   <div id="city-label" aria-hidden="true" hidden></div>
   <script>
     var sc_map_var = [];
 
-    const map = document.querySelector("#map");
     const statusMessage = document.querySelector("#status");
     const pointLayer = document.querySelector("#points");
     const cityLabel = document.querySelector("#city-label");
     const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
-    let visitorPoints = [];
-
-    function fitMap() {
-      map.style.transform = "scale(" + (window.innerWidth / map.offsetWidth) + ")";
-      cityLabel.hidden = true;
-    }
 
     function nearbyCity(latitude, longitude, cities) {
       const maxOffset = 0.32;
@@ -97,6 +95,7 @@
       }
       if (!nearest) return;
       const [, , city, countryCode, province] = nearest;
+      if (countryCode === "HK") return "Hong Kong · 香港";
       const region = province || regionNames.of(countryCode);
       return region === city ? city : city + ", " + region;
     }
@@ -112,18 +111,7 @@
       cityLabel.style.top = (above < 4 ? marker.bottom + 1 : above) + "px";
     }
 
-    async function labelPoints(providerMap) {
-      if (!visitorPoints.length) return;
-      let cities;
-      try {
-        // City names, centroids, and provinces are adapted from GeoNames (CC BY 4.0).
-        const response = await fetch("./visitor-cities.json", { credentials: "omit" });
-        if (!response.ok) return;
-        cities = await response.json();
-      } catch {
-        return;
-      }
-
+    function labelPoints(visitorPoints, cities) {
       const locations = new Set();
       for (const { la, lo } of visitorPoints) {
         if (!Number.isFinite(la) || !Number.isFinite(lo) || Math.abs(la) > 90 || Math.abs(lo) > 180) continue;
@@ -137,7 +125,7 @@
         button.type = "button";
         button.style.left = ((lo + 180) / 3.6) + "%";
         button.style.top = ((90 - la) / 1.8) + "%";
-        button.setAttribute("aria-label", city ? "Near " + city : "City name unavailable");
+        button.setAttribute("aria-label", city ? city + " (approx.)" : "City name unavailable");
         button.addEventListener("pointerenter", () => showCity(button));
         button.addEventListener("pointerleave", (event) => {
           if (event.pointerType !== "touch" && document.activeElement !== button) cityLabel.hidden = true;
@@ -147,45 +135,51 @@
         button.addEventListener("click", () => showCity(button));
         pointLayer.append(button);
       }
-      if (pointLayer.childElementCount) providerMap.replaceChildren();
+      if (pointLayer.childElementCount) statusMessage.hidden = true;
+      else statusMessage.textContent = "No recent visitor points.";
     }
 
-    fitMap();
-    window.addEventListener("resize", fitMap);
-
-    const timeout = setTimeout(() => {
-      statusMessage.textContent = "Visitor map unavailable.";
-      const fallback = new Image();
-      fallback.alt = "Country-level visitor map";
-      fallback.addEventListener("load", () => statusMessage.replaceChildren(fallback), { once: true });
-      fallback.src = "https://s05.flagcounter.com/map/4JbA/size_s/txt_21385E/border_E2E9F5/pageviews_1/viewers_0/";
-    }, 8000);
-
-    const observer = new MutationObserver(() => {
-      const providerMap = map.querySelector("#scvmap");
-      if (!providerMap) return;
-      clearTimeout(timeout);
-      statusMessage.hidden = true;
-      observer.disconnect();
-      labelPoints(providerMap);
-    });
-    observer.observe(map, { childList: true });
-
-    window.addEventListener("DOMContentLoaded", () => {
+    const timeout = setTimeout(() => { statusMessage.textContent = "Visitor points unavailable."; }, 8000);
+    const counter = document.createElement("script");
+    counter.src = "https://widget.supercounters.com/ssl/map.js";
+    counter.addEventListener("load", () => {
       if (typeof sc_map !== "function") return;
-      const renderMap = window.sc_show_map;
-      window.sc_show_map = (id, payload) => {
+      // The counter response has coordinates only. Render them on the on-site basemap.
+      window.sc_show_map = async (id, payload) => {
+        if (id !== 1741601 || typeof payload !== "string") return;
+        let points;
         try {
-          const points = JSON.parse(payload.slice(1, -1));
-          if (Array.isArray(points)) visitorPoints = points;
+          points = JSON.parse(payload.slice(1, -1));
         } catch {
-          // The provider can still render its original map without labels.
+          return;
         }
-        renderMap(id, payload);
+        if (!Array.isArray(points)) return;
+
+        let cities = [];
+        if (points.length) {
+          try {
+            // City names, centroids and provinces are adapted from GeoNames (CC BY 4.0).
+            const response = await fetch("./visitor-cities.json", {
+              credentials: "omit",
+              signal: AbortSignal.timeout(5000)
+            });
+            if (response.ok) cities = await response.json();
+          } catch {
+            // Show the point even if its city name could not be loaded.
+          }
+        }
+        clearTimeout(timeout);
+        labelPoints(points, cities);
       };
       sc_map(1741601, "112288", "ff0000", 1);
     });
+    counter.addEventListener("error", () => {
+      clearTimeout(timeout);
+      statusMessage.textContent = "Visitor points unavailable.";
+    });
+    document.head.append(counter);
 
+    window.addEventListener("resize", () => { cityLabel.hidden = true; });
     document.addEventListener("click", (event) => {
       if (!event.target.closest(".map-point")) cityLabel.hidden = true;
     });

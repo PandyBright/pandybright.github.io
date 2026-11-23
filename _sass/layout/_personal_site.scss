@@ -78,41 +78,9 @@ html[data-theme="dark"] {
   pointer-events: none;
 }
 
-@include breakpoint($large) {
-  #main.main--visitor-map {
-    display: grid;
-    grid-template-columns: clamp(16rem, 30vw, 420px) minmax(0, 1fr);
-    align-items: start;
-    gap: clamp(1.5rem, 3vw, 2.5rem);
-    max-width: $x-large;
-
-    &::after {
-      display: none;
-    }
-
-    > .sidebar,
-    > .page {
-      float: none;
-      width: auto;
-      min-width: 0;
-      max-width: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    > .sidebar {
-      position: sticky;
-      top: calc(#{$masthead-height} + 0.75rem);
-      height: auto;
-      max-height: calc(100vh - #{$masthead-height} - 1.5rem);
-      overflow-y: auto;
-      padding-bottom: 0.2rem;
-    }
-  }
-}
-
 .visitor-map {
-  width: min(100%, 420px);
+  width: 100%;
+  max-width: 19rem;
   margin-top: 0.95rem;
   font-size: 0.8rem;
 
