@@ -8,15 +8,24 @@ if (api) {
   const refresh = guestbook.querySelector(".guestbook__entries-head .guestbook__refresh");
   const list = guestbook.querySelector(".guestbook__list");
   const listStatus = guestbook.querySelector("[data-list-status]");
+  const actionStatus = guestbook.querySelector("[data-action-status]");
+  const confirmation = guestbook.querySelector(".guestbook__confirmation");
+  const confirmTitle = confirmation.querySelector("h2");
+  const confirmDescription = confirmation.querySelector("p");
   const dateFormat = new Intl.DateTimeFormat(document.documentElement.lang, { dateStyle: "medium" });
   const requestTimeout = 15000;
   const deviceKeyStorage = "pandybright-guestbook-device";
+  const voterKeyStorage = "pandybright-guestbook-voter";
   let ownerKey;
+  let voterKey;
+  let isOwner = false;
   let ownerTitleAvatar;
+  let pendingDeletion;
   let latestLoad = 0;
 
   try {
     ownerKey = localStorage.getItem(deviceKeyStorage) || undefined;
+    voterKey = localStorage.getItem(voterKeyStorage) || undefined;
   } catch {
     // Anonymous posting is still available when browser storage is blocked.
   }
@@ -39,27 +48,35 @@ if (api) {
     return avatar;
   }
 
-  function showOwnerTitleAvatar() {
+  function setOwnerState(verified) {
+    isOwner = verified;
+    guestbook.toggleAttribute("data-owner", isOwner);
+    if (!isOwner) {
+      ownerTitleAvatar?.remove();
+      ownerTitleAvatar = undefined;
+      return;
+    }
     if (!title || ownerTitleAvatar) return;
     ownerTitleAvatar = createOwnerAvatar(34, guestbook.dataset.ownerName);
     ownerTitleAvatar.className = "guestbook__title-avatar";
     title.append(ownerTitleAvatar);
   }
 
-  async function verifyOwnerDevice() {
-    if (!ownerKey) return;
+  function getVoterKey() {
+    if (voterKey) return voterKey;
+    const bytes = crypto.getRandomValues(new Uint8Array(32));
+    voterKey = Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
     try {
-      const response = await send({ ownerKey, verifyDevice: true });
-      if (!response.ok) return;
-      const { isOwner } = await response.json();
-      if (isOwner === true) showOwnerTitleAvatar();
+      localStorage.setItem(voterKeyStorage, voterKey);
     } catch {
-      // Leave the title unchanged if the identity check is unavailable.
+      // Keep the vote key for this page when storage is unavailable.
     }
+    return voterKey;
   }
 
-  function renderMessage(entry) {
+  function renderMessage(entry, kind) {
     const item = document.createElement("li");
+    item.dataset.entryKey = `${entry.id}:${entry.created_at}`;
     const header = document.createElement("div");
     header.className = "guestbook__byline";
 
@@ -80,13 +97,100 @@ if (api) {
     const note = document.createElement("p");
     note.textContent = entry.message;
     item.append(header, note);
+    if (Number.isSafeInteger(entry.id)) item.append(renderActions(item, entry, kind));
     return item;
   }
 
+  function renderActions(item, entry, kind) {
+    const target = { kind, id: entry.id, createdAt: entry.created_at };
+    const actions = document.createElement("div");
+    actions.className = "guestbook__actions";
+
+    const star = document.createElement("button");
+    star.type = "button";
+    star.className = "guestbook__star";
+    star.innerHTML = '<span class="guestbook__star-icon" aria-hidden="true">☆</span> <span class="guestbook__star-count" aria-hidden="true">0</span>';
+    star.addEventListener("click", async () => {
+      star.disabled = true;
+      actionStatus.textContent = "";
+      const liked = star.getAttribute("aria-pressed") !== "true";
+      try {
+        const response = await send({ action: "like", ...target, liked,
+          ownerKey: isOwner ? ownerKey : undefined, voterKey: isOwner ? undefined : getVoterKey() });
+        if (response.status === 429) {
+          actionStatus.textContent = "Give it a moment before changing this star again.";
+          return;
+        }
+        if (!response.ok) throw new Error(`Guestbook returned ${response.status}`);
+        updateLike(actions, await response.json());
+        await loadEntries();
+      } catch {
+        actionStatus.textContent = "Could not update the star. Try refreshing the notes.";
+      } finally {
+        star.disabled = false;
+      }
+    });
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "guestbook__delete";
+    remove.setAttribute("aria-label", `Delete ${kind}`);
+    remove.title = `Delete ${kind}`;
+    remove.innerHTML = '<i class="fas fa-trash-alt" aria-hidden="true"></i>';
+    remove.addEventListener("click", () => {
+      if (!isOwner || confirmation.open) return;
+      pendingDeletion = { target, item, button: remove };
+      confirmTitle.textContent = `Delete this ${kind}?`;
+      confirmDescription.textContent = kind === "note"
+        ? "The note and all of its replies will be permanently deleted."
+        : "This reply will be permanently deleted.";
+      confirmation.returnValue = "";
+      confirmation.showModal();
+    });
+
+    const ownerLike = document.createElement("small");
+    ownerLike.className = "guestbook__owner-like";
+    ownerLike.textContent = `${guestbook.dataset.ownerName} likes this`;
+    actions.append(star, remove, ownerLike);
+    updateLike(actions, entry);
+    return actions;
+  }
+
+  function updateLike(actions, entry) {
+    const star = actions.querySelector(".guestbook__star");
+    const count = entry.like_count ?? 0;
+    const liked = entry.liked === 1;
+    star.setAttribute("aria-pressed", liked);
+    star.setAttribute("aria-label", `Star, ${count} ${count === 1 ? "like" : "likes"}`);
+    star.querySelector(".guestbook__star-icon").textContent = liked ? "★" : "☆";
+    star.querySelector(".guestbook__star-count").textContent = count;
+    actions.querySelector(".guestbook__owner-like").hidden = entry.owner_liked !== 1;
+  }
+
+  confirmation.addEventListener("close", async () => {
+    const deletion = pendingDeletion;
+    pendingDeletion = undefined;
+    if (!deletion || confirmation.returnValue !== "delete" || !isOwner) return;
+
+    const { target, item, button } = deletion;
+    button.disabled = true;
+    actionStatus.textContent = "";
+    try {
+      const response = await send({ action: "delete", ...target, ownerKey });
+      if (!response.ok) throw new Error(`Guestbook returned ${response.status}`);
+      item.remove();
+      refresh.focus();
+      await loadEntries();
+    } catch {
+      actionStatus.textContent = `Could not confirm the ${target.kind} was deleted. Try refreshing the notes.`;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
   function renderThread(entry) {
-    const item = renderMessage(entry);
+    const item = renderMessage(entry, "note");
     if (!Number.isSafeInteger(entry.id)) return item;
-    item.dataset.noteId = entry.id;
 
     const replies = document.createElement("ol");
     replies.className = "guestbook__replies";
@@ -117,28 +221,26 @@ if (api) {
       replyForm.querySelector("button[type=submit]").textContent = "Post reply";
       replyForm.querySelector("[data-post-status]").textContent = "";
       disclosure.append(replyForm);
-      setupComposer(replyForm, entry.id);
+      setupComposer(replyForm, entry);
     });
     item.append(replies, disclosure);
     return item;
   }
 
-  function renderEntries(entries) {
-    if (entries.some(entry => !Number.isSafeInteger(entry.id))) {
-      list.replaceChildren(...entries.map(renderThread));
-      return;
-    }
-
+  function renderEntries(container, entries, kind) {
     // Keep open reply forms and drafts in place when refreshing the list.
-    const existing = new Map([...list.children].map(item => [Number(item.dataset.noteId), item]));
-    let next = list.firstElementChild;
+    const existing = new Map([...container.children].map(item => [item.dataset.entryKey, item]));
+    let next = container.firstElementChild;
     for (const entry of entries) {
-      const item = existing.get(entry.id) ?? renderThread(entry);
-      existing.delete(entry.id);
+      const key = `${entry.id}:${entry.created_at}`;
+      const item = existing.get(key) ?? (kind === "note" ? renderThread(entry) : renderMessage(entry, kind));
+      existing.delete(key);
+      const actions = item.querySelector(":scope > .guestbook__actions");
+      if (actions) updateLike(actions, entry);
       const replies = item.querySelector(".guestbook__replies");
-      replies?.replaceChildren(...(entry.replies ?? []).map(renderMessage));
+      if (replies) renderEntries(replies, entry.replies ?? [], "reply");
       if (item === next) next = next.nextElementSibling;
-      else list.insertBefore(item, next);
+      else container.insertBefore(item, next);
     }
     for (const item of existing.values()) item.remove();
   }
@@ -149,11 +251,15 @@ if (api) {
     listStatus.textContent = "Loading visitor notes…";
 
     try {
-      const response = await fetch(api, { signal: AbortSignal.timeout(requestTimeout) });
+      const response = ownerKey || voterKey
+        ? await send({ action: "list", ownerKey, voterKey })
+        : await fetch(api, { signal: AbortSignal.timeout(requestTimeout) });
       if (!response.ok) throw new Error(`Guestbook returned ${response.status}`);
-      const entries = await response.json();
+      const data = await response.json();
+      const entries = Array.isArray(data) ? data : data.entries;
       if (load !== latestLoad) return;
-      renderEntries(entries);
+      setOwnerState(data.isOwner === true);
+      renderEntries(list, entries, "note");
       listStatus.textContent = entries.length ? "" : "No notes yet. Say hello!";
     } catch {
       if (load === latestLoad) listStatus.textContent = "Visitor notes are temporarily unavailable. Try Refresh.";
@@ -162,7 +268,7 @@ if (api) {
     }
   }
 
-  function setupComposer(form, replyTo) {
+  function setupComposer(form, parent) {
     const message = form.querySelector("textarea");
     const count = form.querySelector(".guestbook__count");
     const emojiPicker = form.querySelector(".guestbook__emoji");
@@ -203,7 +309,7 @@ if (api) {
         return;
       }
       if (submit.disabled) return;
-      const kind = replyTo === undefined ? "note" : "reply";
+      const kind = parent ? "reply" : "note";
 
       submit.disabled = true;
       message.readOnly = true;
@@ -211,25 +317,24 @@ if (api) {
       postStatus.textContent = `Posting your ${kind}…`;
 
       try {
-        const response = await send({ message: text, replyTo, ownerKey });
+        const response = await send({ message: text, replyTo: parent?.id, replyCreatedAt: parent?.created_at, ownerKey });
 
         if (response.status === 429) {
           postStatus.textContent = "Please wait a minute before posting another note.";
           return;
         }
-        if (response.status === 404 && replyTo !== undefined) {
+        if (response.status === 404 && parent) {
           postStatus.textContent = "This note is no longer available.";
           return;
         }
         if (response.status === 403 && ownerKey) {
-          ownerTitleAvatar?.remove();
-          ownerTitleAvatar = undefined;
+          setOwnerState(false);
           postStatus.textContent = "Could not verify your identity. Your draft is still here.";
           return;
         }
         if (!response.ok) throw new Error(`Guestbook returned ${response.status}`);
 
-        if (ownerKey) showOwnerTitleAvatar();
+        if (ownerKey) setOwnerState(true);
         message.value = "";
         updateCount();
         postStatus.textContent = `Your ${kind} was posted.`;
@@ -250,6 +355,5 @@ if (api) {
   setupComposer(form);
   refresh.hidden = false;
   refresh.addEventListener("click", loadEntries);
-  verifyOwnerDevice();
   loadEntries();
 }

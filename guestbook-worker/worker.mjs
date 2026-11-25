@@ -1,11 +1,23 @@
 const countries = new Intl.DisplayNames(["en"], { type: "region", fallback: "none" });
 const deviceKeyPattern = /^[a-f0-9]{64}$/;
+const ownerVote = "owner";
+const notes = { table: "guestbook_notes", likes: "guestbook_note_likes", reference: "note_id" };
+const replies = { table: "guestbook_replies", likes: "guestbook_reply_likes", reference: "reply_id" };
+
+async function hashKey(key) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
 
 async function verifyOwner(key, fingerprint) {
   if (typeof key !== "string" || !deviceKeyPattern.test(key) || !fingerprint) return false;
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
-  const hex = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
-  return hex === fingerprint;
+  return await hashKey(key) === fingerprint;
+}
+
+async function voteIdentity(key, isOwner) {
+  if (isOwner) return ownerVote;
+  if (typeof key !== "string" || !deviceKeyPattern.test(key)) return null;
+  return await hashKey(key);
 }
 
 function visitorLocation(geo) {
@@ -17,7 +29,7 @@ function visitorLocation(geo) {
   return city && city !== country ? `${city}, ${country}` : country;
 }
 
-async function parseMessage(request) {
+async function parseRequest(request) {
   if (!request.headers.get("Content-Type")?.startsWith("application/json") || !request.body) return null;
 
   // Stop reading before parsing if the client exceeds the request size limit.
@@ -37,14 +49,39 @@ async function parseMessage(request) {
   }
 
   try {
-    const { message, replyTo, ownerKey, verifyDevice } = JSON.parse(body + decoder.decode()) ?? {};
-    if (verifyDevice === true) return { ownerKey, verifyDevice };
-    if (typeof message !== "string" || !message.trim() || message.length > 500) return null;
-    if (replyTo !== undefined && (!Number.isSafeInteger(replyTo) || replyTo < 1)) return null;
-    return { message: message.trim(), replyTo, ownerKey };
+    const data = JSON.parse(body + decoder.decode());
+    return data && typeof data === "object" && !Array.isArray(data) ? data : null;
   } catch {
     return null;
   }
+}
+
+function likeFields({ likes, reference }) {
+  return `(SELECT COUNT(*) FROM ${likes} WHERE ${reference} = entry.id) AS like_count,
+    EXISTS(SELECT 1 FROM ${likes} WHERE ${reference} = entry.id AND voter = ?1) AS liked,
+    EXISTS(SELECT 1 FROM ${likes} WHERE ${reference} = entry.id AND voter = '${ownerVote}') AS owner_liked`;
+}
+
+async function listEntries(db, voter) {
+  const [noteRows, replyRows] = await db.batch([
+    db.prepare(`SELECT id, message, location, created_at, is_owner, ${likeFields(notes)}
+      FROM guestbook_notes entry ORDER BY id DESC LIMIT 50`).bind(voter),
+    db.prepare(`SELECT id, note_id, message, location, created_at, is_owner, ${likeFields(replies)} FROM guestbook_replies entry
+      WHERE note_id IN (SELECT id FROM guestbook_notes ORDER BY id DESC LIMIT 50) ORDER BY id`).bind(voter),
+  ]);
+  const threads = new Map(noteRows.results.map(note => [note.id, { ...note, replies: [] }]));
+  for (const { note_id, ...reply } of replyRows.results) threads.get(note_id).replies.push(reply);
+  return [...threads.values()];
+}
+
+async function setLike(db, target, { id, createdAt, liked }, voter) {
+  const { table, likes, reference } = target;
+  const change = liked
+    ? db.prepare(`INSERT OR IGNORE INTO ${likes} (${reference}, voter) SELECT id, ?1 FROM ${table} WHERE id = ?2 AND created_at = ?3`)
+    : db.prepare(`DELETE FROM ${likes} WHERE voter = ?1 AND ${reference} IN (SELECT id FROM ${table} WHERE id = ?2 AND created_at = ?3)`);
+  const query = db.prepare(`SELECT ${likeFields(target)} FROM ${table} entry WHERE id = ?2 AND created_at = ?3`);
+  const [, updated] = await db.batch([change.bind(voter, id, createdAt), query.bind(voter, id, createdAt)]);
+  return updated.results[0];
 }
 
 export default {
@@ -64,42 +101,63 @@ export default {
       });
     }
 
-    if (request.method === "GET") {
-      const recent = "SELECT id FROM guestbook_notes ORDER BY id DESC LIMIT 50";
-      const [notes, replies] = await env.DB.batch([
-        env.DB.prepare("SELECT id, message, location, created_at, is_owner FROM guestbook_notes ORDER BY id DESC LIMIT 50"),
-        env.DB.prepare(`SELECT note_id, message, location, created_at, is_owner FROM guestbook_replies
-          WHERE note_id IN (${recent}) ORDER BY id`),
-      ]);
-      const threads = new Map(notes.results.map(note => [note.id, { ...note, replies: [] }]));
-      for (const { note_id, ...reply } of replies.results) threads.get(note_id).replies.push(reply);
-      return json([...threads.values()]);
-    }
-
+    if (request.method === "GET") return json(await listEntries(env.DB, null));
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
     if (origin !== env.SITE_ORIGIN) return json({ error: "Forbidden origin" }, 403);
 
-    const data = await parseMessage(request);
-    if (!data) return json({ error: "Invalid message or reply target" }, 400);
-    if (data.verifyDevice) return json({ isOwner: await verifyOwner(data.ownerKey, env.OWNER_DEVICE_HASH) });
+    const data = await parseRequest(request);
+    if (!data) return json({ error: "Invalid request" }, 400);
+    const { action, ownerKey, voterKey } = data;
+    const isOwner = await verifyOwner(ownerKey, env.OWNER_DEVICE_HASH);
+    if (data.verifyDevice === true) return json({ isOwner });
+    if (action === "list") {
+      return json({ entries: await listEntries(env.DB, await voteIdentity(voterKey, isOwner)), isOwner });
+    }
+    if (ownerKey !== undefined && !isOwner) return json({ error: "Owner device not paired" }, 403);
 
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+    if (action === "like" || action === "delete") {
+      if (action === "delete" && !isOwner) return json({ error: "Forbidden" }, 403);
+      const { kind, id, createdAt } = data;
+      const target = kind === "note" ? notes : kind === "reply" ? replies : null;
+      if (!target || !Number.isSafeInteger(id) || id < 1 || typeof createdAt !== "string" || createdAt.length > 40) {
+        return json({ error: "Invalid target" }, 400);
+      }
+
+      if (action === "delete") {
+        await env.DB.prepare(`DELETE FROM ${target.table} WHERE id = ?1 AND created_at = ?2`).bind(id, createdAt).run();
+        return json({ ok: true });
+      }
+
+      const voter = await voteIdentity(voterKey, isOwner);
+      if (!voter || typeof data.liked !== "boolean") return json({ error: "Invalid star" }, 400);
+      const { success } = await env.POST_LIMIT.limit({ key: `star:${ip}:${kind}:${id}` });
+      if (!success) return json({ error: "Too many requests" }, 429);
+      const updated = await setLike(env.DB, target, data, voter);
+      return updated ? json(updated) : json({ error: "Message not found" }, 404);
+    }
+
+    const { message, replyTo, replyCreatedAt } = data;
+    if (action !== undefined || typeof message !== "string" || !message.trim() || message.length > 500 ||
+        (replyTo !== undefined && (!Number.isSafeInteger(replyTo) || replyTo < 1)) ||
+        (replyCreatedAt !== undefined && (typeof replyCreatedAt !== "string" || replyCreatedAt.length > 40))) {
+      return json({ error: "Invalid message or reply target" }, 400);
+    }
+
     const { success } = await env.POST_LIMIT.limit({ key: ip });
     if (!success) return json({ error: "Too many notes" }, 429);
 
-    const isOwner = await verifyOwner(data.ownerKey, env.OWNER_DEVICE_HASH);
-    if (data.ownerKey !== undefined && !isOwner) return json({ error: "Owner device not paired" }, 403);
-
     const location = visitorLocation(request.cf);
     const createdAt = new Date().toISOString();
-    if (data.replyTo !== undefined) {
+    if (replyTo !== undefined) {
       const result = await env.DB.prepare(
-        "INSERT INTO guestbook_replies (note_id, message, location, created_at, is_owner) SELECT id, ?1, ?2, ?3, ?4 FROM guestbook_notes WHERE id = ?5"
-      ).bind(data.message, location, createdAt, Number(isOwner), data.replyTo).run();
+        `INSERT INTO guestbook_replies (note_id, message, location, created_at, is_owner)
+         SELECT id, ?1, ?2, ?3, ?4 FROM guestbook_notes WHERE id = ?5 AND (?6 IS NULL OR created_at = ?6)`
+      ).bind(message.trim(), location, createdAt, Number(isOwner), replyTo, replyCreatedAt ?? null).run();
       if (!result.meta.changes) return json({ error: "Note not found" }, 404);
     } else {
       await env.DB.prepare("INSERT INTO guestbook_notes (message, location, created_at, is_owner) VALUES (?1, ?2, ?3, ?4)")
-        .bind(data.message, location, createdAt, Number(isOwner)).run();
+        .bind(message.trim(), location, createdAt, Number(isOwner)).run();
     }
     return json({ ok: true }, 201);
   },

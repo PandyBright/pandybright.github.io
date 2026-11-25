@@ -52,7 +52,19 @@ description: "Leave a public note on Pandy Bright’s homepage."
       <button class="guestbook__refresh" type="button" hidden>Refresh</button>
     </div>
     <p class="guestbook__status" data-list-status role="status"></p>
+    <p class="guestbook__status" data-action-status role="status"></p>
     <ol class="guestbook__list"></ol>
   </section>
+
+  <dialog class="guestbook__confirmation" aria-labelledby="guestbook-delete-title" aria-describedby="guestbook-delete-description">
+    <form method="dialog">
+      <h2 id="guestbook-delete-title">Delete this message?</h2>
+      <p id="guestbook-delete-description"></p>
+      <div class="guestbook__confirm-actions">
+        <button class="guestbook__refresh" value="cancel" autofocus>Cancel</button>
+        <button class="guestbook__refresh guestbook__confirm-delete" value="delete">Delete</button>
+      </div>
+    </form>
+  </dialog>
   {% endif %}
 </div>

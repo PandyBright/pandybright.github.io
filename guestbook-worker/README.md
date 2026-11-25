@@ -17,6 +17,8 @@ The site displays the latest 50 notes with their replies. To remove a reply, del
 
 For an existing database created before owner attribution, run `npx wrangler d1 execute pandybright-guestbook --remote --file=owner-attribution.sql` once before deploying this version of the Worker. A new database initialized from `schema.sql` already has these columns.
 
+For an existing database, apply `likes.sql` with `npx wrangler d1 execute pandybright-guestbook --remote --file=likes.sql` before deploying the star reactions. Stars use the hash of a random browser key or the verified owner identity. Deleting a note removes its stars, replies, and reply stars.
+
 The guestbook recognizes an approved browser profile when it opens and shows the owner's avatar next to the title. To pair a profile after changing browsers or clearing site data, open `/guestbook/` in that profile and run the following in the browser's developer console. Set the production Worker's `OWNER_DEVICE_HASH` text variable to the resulting fingerprint, then reload the guestbook. Removing the variable revokes that browser's ability to post as the owner.
 
 ```js
