@@ -169,7 +169,11 @@ if (api) {
 
   function updateReplyReference(item, target) {
     const previous = item.querySelector(":scope > .guestbook__reply-reference");
-    if (!target || previous?.dataset.deleted === String(Boolean(target.deleted))) return;
+    if (target?.kind !== "reply") {
+      previous?.remove();
+      return;
+    }
+    if (previous?.dataset.deleted === String(Boolean(target.deleted))) return;
 
     const reference = document.createElement(target.deleted ? "div" : "a");
     reference.className = "guestbook__reply-reference";
@@ -180,7 +184,7 @@ if (api) {
     const subject = target.deleted ? "a deleted reply" : authorLabel(target);
     reference.append(`Replying to ${subject} · `, time);
     if (!target.deleted) {
-      reference.href = `#guestbook-${target.kind}-${target.id}`;
+      reference.href = `#guestbook-reply-${target.id}`;
       reference.addEventListener("click", () => revealLinkedEntry(reference.hash));
       const excerpt = document.createElement("span");
       excerpt.className = "guestbook__reply-excerpt";
