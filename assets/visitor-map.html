@@ -21,8 +21,8 @@
     #points { position: absolute; inset: 0; touch-action: manipulation; }
     #map-controls {
       position: absolute;
-      top: 0.45rem;
-      right: 0.45rem;
+      bottom: 0.45rem;
+      left: 50%;
       z-index: 2;
       padding: 0.3rem 0.42rem;
       border-radius: 0.35rem;
@@ -31,6 +31,7 @@
       font-size: 0.72rem;
       line-height: 1.2;
       box-shadow: 0 1px 5px #14244933;
+      transform: translateX(-50%);
     }
     #magnifier-toggle { margin: 0 0.22rem 0 0; vertical-align: -1px; accent-color: #6e72e8; }
     .map-point {
