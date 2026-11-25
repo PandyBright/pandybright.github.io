@@ -138,7 +138,7 @@ if (api) {
     toggle.setAttribute("aria-controls", replies.id);
     toggle.setAttribute("aria-expanded", "false");
     toggle.addEventListener("click", () => updateReplyVisibility(note, toggle.getAttribute("aria-expanded") !== "true"));
-    note.append(toggle, replies);
+    note.append(replies, toggle);
   }
 
   function updateReplyVisibility(note, expanded) {
