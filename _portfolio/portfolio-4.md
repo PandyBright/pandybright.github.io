@@ -16,8 +16,8 @@ A short series from Huizhou that moves between sea breeze, urban silhouettes, an
 
 <div class="photo-gallery">
   <img src="/images/huizhou/031EC636-553C-4FEF-87BD-FC5856015FDD_1_105_c.jpeg" width="724" height="1086" decoding="async">
-  <img class="photo-gallery__wide" src="/images/huizhou/4DC93260-993E-4ACA-8962-40AF25E26DEA_1_105_c.jpeg" width="1086" height="724" loading="lazy" decoding="async">
   <img src="/images/huizhou/58E66631-CB3F-4F91-96BB-882E30BE611F_1_105_c.jpeg" width="724" height="1086" loading="lazy" decoding="async">
+  <img class="photo-gallery__wide" src="/images/huizhou/4DC93260-993E-4ACA-8962-40AF25E26DEA_1_105_c.jpeg" width="1086" height="724" loading="lazy" decoding="async">
   <img class="photo-gallery__wide" src="/images/huizhou/71141604-FE40-46FF-ACA5-96D1A7D73986_1_105_c.jpeg" width="1086" height="724" loading="lazy" decoding="async">
   <img class="photo-gallery__wide" src="/images/huizhou/8ED22283-337F-4E17-BD85-1FBF49102088_1_105_c.jpeg" width="1182" height="666" loading="lazy" decoding="async">
   <img src="/images/huizhou/A420892F-D857-4BCA-87D9-E98A914BD6C7_1_105_c.jpeg" width="723" height="1086" loading="lazy" decoding="async">
