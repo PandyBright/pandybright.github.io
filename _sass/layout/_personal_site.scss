@@ -812,22 +812,38 @@ html[data-theme="dark"] {
     color: var(--global-text-color);
   }
 
+  .guestbook__message {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+
+    > p {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+    }
+  }
+
   .guestbook__reply {
-    margin-top: 0.35rem;
+    flex: none;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--site-accent-strong);
+    font-size: 0.85rem;
+    font-weight: 650;
+    text-align: end;
+    cursor: pointer;
 
-    summary {
-      width: fit-content;
-      min-height: 44px;
-      padding: 0.65rem 0.25rem;
-      color: var(--site-accent-strong);
-      font-size: 0.85rem;
-      font-weight: 650;
-      cursor: pointer;
+    &:hover {
+      text-decoration: underline;
     }
+  }
 
-    .guestbook__form {
-      padding: 0.65rem 0;
-    }
+  .guestbook__reply-form .guestbook__form {
+    padding: 0.65rem 0;
   }
 }
 

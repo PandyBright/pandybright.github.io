@@ -106,13 +106,18 @@ if (api) {
 
     const note = document.createElement("p");
     note.textContent = entry.message;
-    item.append(header, note);
+    const content = document.createElement("div");
+    content.className = "guestbook__message";
+    content.append(note);
+    item.append(header, content);
     if (Number.isSafeInteger(entry.id)) {
+      const { trigger, composer } = renderReplyForm(entry, kind);
+      content.append(trigger);
       const ownerLike = document.createElement("small");
       ownerLike.className = "guestbook__owner-like";
       ownerLike.hidden = true;
       ownerLike.append(createOwnerAvatar(16), `${guestbook.dataset.ownerName} Likes This`);
-      item.append(ownerLike, renderReplyForm(entry, kind));
+      item.append(ownerLike, composer);
       if (kind === "note") {
         const replies = document.createElement("ol");
         replies.className = "guestbook__replies";
@@ -232,16 +237,25 @@ if (api) {
   });
 
   function renderReplyForm(entry, kind) {
-    const disclosure = document.createElement("details");
-    disclosure.className = "guestbook__reply";
-    const trigger = document.createElement("summary");
+    const messageId = `guestbook-compose-${kind}-${entry.id}`;
+    const composer = document.createElement("div");
+    composer.className = "guestbook__reply-form";
+    composer.id = `${messageId}-panel`;
+    composer.hidden = true;
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "guestbook__reply";
     trigger.textContent = "Reply";
-    disclosure.append(trigger);
-    disclosure.addEventListener("toggle", () => {
-      if (!disclosure.open || disclosure.querySelector("form")) return;
+    trigger.setAttribute("aria-controls", composer.id);
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.addEventListener("click", () => {
+      const expanding = composer.hidden;
+      composer.hidden = !expanding;
+      trigger.setAttribute("aria-expanded", expanding);
+      if (!expanding || composer.firstElementChild) return;
 
       const replyForm = replyTemplate.cloneNode(true);
-      const messageId = `guestbook-compose-${kind}-${entry.id}`;
       const field = replyForm.querySelector("textarea");
       field.id = messageId;
       field.value = "";
@@ -256,10 +270,10 @@ if (api) {
       help.textContent = "Your reply and approximate location will be public.";
       replyForm.querySelector("button[type=submit]").textContent = "Post reply";
       replyForm.querySelector("[data-post-status]").textContent = "";
-      disclosure.append(replyForm);
+      composer.append(replyForm);
       setupComposer(replyForm, { replyTo: entry.id, replyCreatedAt: entry.created_at, replyToKind: kind });
     });
-    return disclosure;
+    return { trigger, composer };
   }
 
   function renderEntries(container, entries, kind) {
