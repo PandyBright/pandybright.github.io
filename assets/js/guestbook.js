@@ -249,10 +249,15 @@ if (api) {
     trigger.textContent = "Reply";
     trigger.setAttribute("aria-controls", composer.id);
     trigger.setAttribute("aria-expanded", "false");
+
+    function setExpanded(expanded) {
+      composer.hidden = !expanded;
+      trigger.setAttribute("aria-expanded", expanded);
+    }
+
     trigger.addEventListener("click", () => {
       const expanding = composer.hidden;
-      composer.hidden = !expanding;
-      trigger.setAttribute("aria-expanded", expanding);
+      setExpanded(expanding);
       if (!expanding || composer.firstElementChild) return;
 
       const replyForm = replyTemplate.cloneNode(true);
@@ -271,7 +276,13 @@ if (api) {
       replyForm.querySelector("button[type=submit]").textContent = "Post reply";
       replyForm.querySelector("[data-post-status]").textContent = "";
       composer.append(replyForm);
-      setupComposer(replyForm, { replyTo: entry.id, replyCreatedAt: entry.created_at, replyToKind: kind });
+      setupComposer(replyForm, { replyTo: entry.id, replyCreatedAt: entry.created_at, replyToKind: kind }, () => {
+        const restoreFocus = !composer.hidden &&
+          (composer.contains(document.activeElement) || document.activeElement === document.body);
+        setExpanded(false);
+        if (restoreFocus) trigger.focus({ preventScroll: true });
+        actionStatus.textContent = "Your reply was posted.";
+      });
     });
     return { trigger, composer };
   }
@@ -317,7 +328,7 @@ if (api) {
     }
   }
 
-  function setupComposer(form, parent) {
+  function setupComposer(form, parent, onPosted) {
     const message = form.querySelector("textarea");
     const count = form.querySelector(".guestbook__count");
     const emojiPicker = form.querySelector(".guestbook__emoji");
@@ -386,7 +397,8 @@ if (api) {
         if (ownerKey) setOwnerState(true);
         message.value = "";
         updateCount();
-        postStatus.textContent = `Your ${kind} was posted.`;
+        postStatus.textContent = onPosted ? "" : `Your ${kind} was posted.`;
+        onPosted?.();
         await loadEntries();
       } catch {
         postStatus.textContent = `Could not confirm your ${kind} was posted. Your draft is still here. Check Visitor notes before trying again.`;
