@@ -33,7 +33,11 @@ My earlier research focused on the robustness of autonomous driving perception, 
 
 ## Recent Updates {#news}
 
-{% include moon-note.html %}
+<div class="guestbook-stamp">
+  <a href="{{ '/guestbook/' | relative_url }}" aria-label="Open Xiaoyu’s guestbook" title="Xiaoyu’s Guestbook">
+    <img src="{{ '/assets/xiaoyu.webp' | relative_url }}" width="44" height="44" alt="">
+  </a>
+</div>
 
 <ul class="home-updates">
 {% for update in site.talks reversed limit:3 %}

@@ -1,0 +1,53 @@
+---
+permalink: /guestbook/
+title: "Xiaoyu’s Guestbook"
+description: "Leave a public note on Pandy Bright’s homepage."
+---
+
+<div class="guestbook" data-guestbook-api="{{ site.guestbook_api | escape }}">
+  <section class="guestbook__compose" aria-labelledby="guestbook-compose-title">
+    <div class="guestbook__intro">
+      <img src="{{ '/assets/xiaoyu.webp' | relative_url }}" width="96" height="96" alt="Fan illustration of Xiaoyu from Fei Ren Zai">
+      <div>
+        <h2 id="guestbook-compose-title">Leave a note</h2>
+        <p>Say hello, share a thought, or just drop an emoji.</p>
+      </div>
+    </div>
+
+    {% if site.guestbook_api %}
+    <form class="guestbook__form" method="post" hidden>
+      <label for="guestbook-message">Message</label>
+      <textarea id="guestbook-message" rows="4" maxlength="500" required aria-describedby="guestbook-help" placeholder="Write something…"></textarea>
+      <div class="guestbook__tools">
+        <div class="guestbook__emoji" role="group" aria-label="Add an emoji">
+          <button type="button" aria-label="Insert waving hand">👋</button>
+          <button type="button" aria-label="Insert rabbit">🐰</button>
+          <button type="button" aria-label="Insert sparkles">✨</button>
+          <button type="button" aria-label="Insert red heart">❤️</button>
+          <button type="button" aria-label="Insert camera">📷</button>
+          <button type="button" aria-label="Insert smiling face">😊</button>
+        </div>
+        <span class="guestbook__count" aria-hidden="true">0 / 500</span>
+      </div>
+      <button class="btn guestbook__submit" type="submit">Post note</button>
+      <p class="guestbook__help" id="guestbook-help">Your note and approximate location will be public.</p>
+      <p class="guestbook__status" data-post-status role="status"></p>
+    </form>
+
+    <noscript><p>Enable JavaScript to write a note and read the guestbook on this page.</p></noscript>
+    {% else %}
+    <p class="guestbook__help">Posting is temporarily unavailable.</p>
+    {% endif %}
+  </section>
+
+  {% if site.guestbook_api %}
+  <section class="guestbook__entries" aria-labelledby="guestbook-entries-title">
+    <div class="guestbook__entries-head">
+      <h2 id="guestbook-entries-title">Visitor notes</h2>
+      <button class="guestbook__refresh" type="button" hidden>Refresh</button>
+    </div>
+    <p class="guestbook__status" data-list-status role="status"></p>
+    <ol class="guestbook__list"></ol>
+  </section>
+  {% endif %}
+</div>
