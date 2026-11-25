@@ -92,12 +92,21 @@ if (api) {
     const date = document.createElement("time");
     date.dateTime = entry.created_at;
     date.textContent = dateFormat.format(new Date(entry.created_at));
-    header.append(author, date);
+    const metadata = document.createElement("div");
+    metadata.className = "guestbook__metadata";
+    if (Number.isSafeInteger(entry.id)) metadata.append(renderActions(item, entry, kind));
+    metadata.append(date);
+    header.append(author, metadata);
 
     const note = document.createElement("p");
     note.textContent = entry.message;
     item.append(header, note);
-    if (Number.isSafeInteger(entry.id)) item.append(renderActions(item, entry, kind));
+    if (Number.isSafeInteger(entry.id)) {
+      const ownerLike = document.createElement("small");
+      ownerLike.className = "guestbook__owner-like";
+      ownerLike.textContent = `${guestbook.dataset.ownerName} likes this`;
+      item.append(ownerLike);
+    }
     return item;
   }
 
@@ -122,7 +131,7 @@ if (api) {
           return;
         }
         if (!response.ok) throw new Error(`Guestbook returned ${response.status}`);
-        updateLike(actions, await response.json());
+        updateLike(item, await response.json());
         await loadEntries();
       } catch {
         actionStatus.textContent = "Could not update the star. Try refreshing the notes.";
@@ -148,23 +157,19 @@ if (api) {
       confirmation.showModal();
     });
 
-    const ownerLike = document.createElement("small");
-    ownerLike.className = "guestbook__owner-like";
-    ownerLike.textContent = `${guestbook.dataset.ownerName} likes this`;
-    actions.append(star, remove, ownerLike);
-    updateLike(actions, entry);
+    actions.append(star, remove);
     return actions;
   }
 
-  function updateLike(actions, entry) {
-    const star = actions.querySelector(".guestbook__star");
+  function updateLike(item, entry) {
+    const star = item.querySelector(":scope > .guestbook__byline .guestbook__star");
     const count = entry.like_count ?? 0;
     const liked = entry.liked === 1;
     star.setAttribute("aria-pressed", liked);
     star.setAttribute("aria-label", `Star, ${count} ${count === 1 ? "like" : "likes"}`);
     star.querySelector(".guestbook__star-icon").textContent = liked ? "★" : "☆";
     star.querySelector(".guestbook__star-count").textContent = count;
-    actions.querySelector(".guestbook__owner-like").hidden = entry.owner_liked !== 1;
+    item.querySelector(":scope > .guestbook__owner-like").hidden = entry.owner_liked !== 1;
   }
 
   confirmation.addEventListener("close", async () => {
@@ -235,8 +240,7 @@ if (api) {
       const key = `${entry.id}:${entry.created_at}`;
       const item = existing.get(key) ?? (kind === "note" ? renderThread(entry) : renderMessage(entry, kind));
       existing.delete(key);
-      const actions = item.querySelector(":scope > .guestbook__actions");
-      if (actions) updateLike(actions, entry);
+      if (Number.isSafeInteger(entry.id)) updateLike(item, entry);
       const replies = item.querySelector(".guestbook__replies");
       if (replies) renderEntries(replies, entry.replies ?? [], "reply");
       if (item === next) next = next.nextElementSibling;
