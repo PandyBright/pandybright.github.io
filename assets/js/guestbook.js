@@ -312,11 +312,14 @@ if (api) {
       const label = replyForm.querySelector("label");
       label.htmlFor = messageId;
       label.textContent = "Your reply";
-      const help = replyForm.querySelector(".guestbook__help");
+      const help = document.createElement("p");
+      help.className = "guestbook__help";
       help.id = `${messageId}-help`;
       help.textContent = "Your reply and approximate location will be public.";
       replyForm.querySelector("button[type=submit]").textContent = "Post reply";
-      replyForm.querySelector("[data-post-status]").textContent = "";
+      const postStatus = replyForm.querySelector("[data-post-status]");
+      postStatus.textContent = "";
+      postStatus.before(help);
       composer.append(replyForm);
       setupComposer(replyForm, { replyTo: entry.id, replyCreatedAt: entry.created_at, replyToKind: kind }, () => {
         const restoreFocus = !composer.hidden &&

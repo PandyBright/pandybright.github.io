@@ -16,6 +16,9 @@ description: "Leave a public note on Pandy Bright’s homepage."
       <div>
         <h2 id="guestbook-compose-title">Leave a note</h2>
         <p>Say hello, share a thought, or just drop an emoji.</p>
+        {% if site.guestbook_api %}
+        <p class="guestbook__help" id="guestbook-help">Your note and approximate location will be public.</p>
+        {% endif %}
       </div>
     </div>
 
@@ -35,7 +38,6 @@ description: "Leave a public note on Pandy Bright’s homepage."
         <span class="guestbook__count" aria-hidden="true">0 / 500</span>
       </div>
       <button class="btn guestbook__submit" type="submit">Post note</button>
-      <p class="guestbook__help" id="guestbook-help">Your note and approximate location will be public.</p>
       <p class="guestbook__status" data-post-status role="status"></p>
     </form>
 
