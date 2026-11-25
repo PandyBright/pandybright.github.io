@@ -9,7 +9,7 @@ SITE_ORIGIN = "https://pandybright.github.io"
 [[d1_databases]]
 binding = "DB"
 database_name = "pandybright-guestbook"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "b4808f68-a87e-40bb-bd18-c1ca19018391"
 
 [[ratelimits]]
 name = "POST_LIMIT"
