@@ -4,7 +4,12 @@ title: "Xiaoyu’s Guestbook"
 description: "Leave a public note on Pandy Bright’s homepage."
 ---
 
-<div class="guestbook" data-guestbook-api="{{ site.guestbook_api | escape }}">
+{% assign owner_avatar = site.author.avatar %}
+{% unless owner_avatar contains '://' %}
+  {% assign owner_avatar = owner_avatar | prepend: '/images/' | relative_url %}
+{% endunless %}
+<div class="guestbook" data-guestbook-api="{{ site.guestbook_api | escape }}"
+     data-owner-name="{{ site.author.name | escape }}" data-owner-avatar="{{ owner_avatar | escape }}">
   <section class="guestbook__compose" aria-labelledby="guestbook-compose-title">
     <div class="guestbook__intro">
       <img src="{{ '/assets/xiaoyu.webp' | relative_url }}" width="96" height="96" alt="Fan illustration of Xiaoyu from Fei Ren Zai">
@@ -41,6 +46,14 @@ description: "Leave a public note on Pandy Bright’s homepage."
   </section>
 
   {% if site.guestbook_api %}
+  <section class="guestbook__device" data-owner-device aria-labelledby="owner-device-title" hidden>
+    <h2 id="owner-device-title">Pair this browser</h2>
+    <p>The fingerprint below identifies this browser. Posting as the site owner requires approval in Cloudflare.</p>
+    <button class="guestbook__refresh" type="button" data-device-pair>Generate browser fingerprint</button>
+    <code data-device-fingerprint></code>
+    <p class="guestbook__status" data-device-status role="status"></p>
+  </section>
+
   <section class="guestbook__entries" aria-labelledby="guestbook-entries-title">
     <div class="guestbook__entries-head">
       <h2 id="guestbook-entries-title">Visitor notes</h2>

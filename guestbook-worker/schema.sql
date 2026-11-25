@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS guestbook_notes (
   id INTEGER PRIMARY KEY,
   message TEXT NOT NULL,
   location TEXT,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  is_owner INTEGER NOT NULL DEFAULT 0 CHECK (is_owner IN (0, 1))
 );
 
 CREATE TABLE IF NOT EXISTS guestbook_replies (
@@ -10,7 +11,8 @@ CREATE TABLE IF NOT EXISTS guestbook_replies (
   note_id INTEGER NOT NULL REFERENCES guestbook_notes(id) ON DELETE CASCADE,
   message TEXT NOT NULL,
   location TEXT,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  is_owner INTEGER NOT NULL DEFAULT 0 CHECK (is_owner IN (0, 1))
 );
 
 CREATE INDEX IF NOT EXISTS guestbook_replies_note_id ON guestbook_replies(note_id);

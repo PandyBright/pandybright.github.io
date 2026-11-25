@@ -1,4 +1,12 @@
 const countries = new Intl.DisplayNames(["en"], { type: "region", fallback: "none" });
+const deviceKeyPattern = /^[a-f0-9]{64}$/;
+
+async function verifyOwner(key, fingerprint) {
+  if (typeof key !== "string" || !deviceKeyPattern.test(key) || !fingerprint) return false;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
+  const hex = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+  return hex === fingerprint;
+}
 
 function visitorLocation(geo) {
   if (!geo?.country || !/^[A-Z]{2}$/.test(geo.country)) return null;
@@ -29,10 +37,11 @@ async function parseMessage(request) {
   }
 
   try {
-    const { message, replyTo } = JSON.parse(body + decoder.decode()) ?? {};
+    const { message, replyTo, ownerKey, verifyDevice } = JSON.parse(body + decoder.decode()) ?? {};
+    if (verifyDevice === true) return { ownerKey, verifyDevice };
     if (typeof message !== "string" || !message.trim() || message.length > 500) return null;
     if (replyTo !== undefined && (!Number.isSafeInteger(replyTo) || replyTo < 1)) return null;
-    return { message: message.trim(), replyTo };
+    return { message: message.trim(), replyTo, ownerKey };
   } catch {
     return null;
   }
@@ -58,8 +67,8 @@ export default {
     if (request.method === "GET") {
       const recent = "SELECT id FROM guestbook_notes ORDER BY id DESC LIMIT 50";
       const [notes, replies] = await env.DB.batch([
-        env.DB.prepare("SELECT id, message, location, created_at FROM guestbook_notes ORDER BY id DESC LIMIT 50"),
-        env.DB.prepare(`SELECT note_id, message, location, created_at FROM guestbook_replies
+        env.DB.prepare("SELECT id, message, location, created_at, is_owner FROM guestbook_notes ORDER BY id DESC LIMIT 50"),
+        env.DB.prepare(`SELECT note_id, message, location, created_at, is_owner FROM guestbook_replies
           WHERE note_id IN (${recent}) ORDER BY id`),
       ]);
       const threads = new Map(notes.results.map(note => [note.id, { ...note, replies: [] }]));
@@ -76,17 +85,20 @@ export default {
 
     const data = await parseMessage(request);
     if (!data) return json({ error: "Invalid message or reply target" }, 400);
+    const isOwner = await verifyOwner(data.ownerKey, env.OWNER_DEVICE_HASH);
+    if (data.verifyDevice) return json({ isOwner });
+    if (data.ownerKey !== undefined && !isOwner) return json({ error: "Owner device not paired" }, 403);
 
     const location = visitorLocation(request.cf);
     const createdAt = new Date().toISOString();
     if (data.replyTo !== undefined) {
       const result = await env.DB.prepare(
-        "INSERT INTO guestbook_replies (note_id, message, location, created_at) SELECT id, ?1, ?2, ?3 FROM guestbook_notes WHERE id = ?4"
-      ).bind(data.message, location, createdAt, data.replyTo).run();
+        "INSERT INTO guestbook_replies (note_id, message, location, created_at, is_owner) SELECT id, ?1, ?2, ?3, ?4 FROM guestbook_notes WHERE id = ?5"
+      ).bind(data.message, location, createdAt, Number(isOwner), data.replyTo).run();
       if (!result.meta.changes) return json({ error: "Note not found" }, 404);
     } else {
-      await env.DB.prepare("INSERT INTO guestbook_notes (message, location, created_at) VALUES (?1, ?2, ?3)")
-        .bind(data.message, location, createdAt).run();
+      await env.DB.prepare("INSERT INTO guestbook_notes (message, location, created_at, is_owner) VALUES (?1, ?2, ?3, ?4)")
+        .bind(data.message, location, createdAt, Number(isOwner)).run();
     }
     return json({ ok: true }, 201);
   },

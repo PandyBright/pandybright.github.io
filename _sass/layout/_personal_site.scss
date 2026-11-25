@@ -641,6 +641,28 @@ html[data-theme="dark"] {
     color: var(--site-accent-strong);
   }
 
+  .guestbook__author {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    img {
+      flex: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  .guestbook__device {
+    margin-top: 1.5rem;
+
+    code {
+      overflow-wrap: anywhere;
+    }
+  }
+
   .guestbook__replies {
     margin: 0.75rem 0 0;
     padding: 0 0 0 0.75rem;
