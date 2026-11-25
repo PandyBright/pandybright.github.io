@@ -20,11 +20,11 @@
     {% endif %}
     {% endcapture %}
     {% if page.url == '/' %}
-      <details class="avatar-mascot">
-        <summary aria-label="Say hello to the mascot" title="Say hello">
+      <details class="avatar-mascot" data-easter-egg>
+        <summary aria-label="Reveal a hidden hint" title="Reveal a hidden hint">
           {{ avatar }}
         </summary>
-        <p class="avatar-mascot__greeting">You found me! <span aria-hidden="true">✦</span></p>
+        <p class="avatar-mascot__greeting">Psst… check the cloud by Recent Updates.</p>
       </details>
     {% else %}
       {{ avatar }}

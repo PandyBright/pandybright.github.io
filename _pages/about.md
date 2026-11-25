@@ -29,9 +29,11 @@ My earlier research focused on the robustness of autonomous driving perception, 
 
 </section>
 
-<section class="home-section" aria-labelledby="news" markdown="1">
+<section class="home-section home-updates-section" aria-labelledby="news" markdown="1">
 
 ## Recent Updates {#news}
+
+{% include moon-note.html %}
 
 <ul class="home-updates">
 {% for update in site.talks reversed limit:3 %}
