@@ -62,15 +62,31 @@ function likeFields({ likes, reference }) {
     EXISTS(SELECT 1 FROM ${likes} WHERE ${reference} = entry.id AND voter = '${ownerVote}') AS owner_liked`;
 }
 
+function replyReference(kind, entry) {
+  const { id, created_at, message, is_owner, location } = entry;
+  return { kind, id, created_at, message, is_owner, location };
+}
+
 async function listEntries(db, voter) {
   const [noteRows, replyRows] = await db.batch([
     db.prepare(`SELECT id, message, location, created_at, is_owner, ${likeFields(notes)}
       FROM guestbook_notes entry ORDER BY id DESC LIMIT 50`).bind(voter),
-    db.prepare(`SELECT id, note_id, message, location, created_at, is_owner, ${likeFields(replies)} FROM guestbook_replies entry
+    db.prepare(`SELECT id, note_id, message, location, created_at, is_owner, reply_to_id, reply_to_created_at,
+      ${likeFields(replies)} FROM guestbook_replies entry
       WHERE note_id IN (SELECT id FROM guestbook_notes ORDER BY id DESC LIMIT 50) ORDER BY id`).bind(voter),
   ]);
   const threads = new Map(noteRows.results.map(note => [note.id, { ...note, replies: [] }]));
-  for (const { note_id, ...reply } of replyRows.results) threads.get(note_id).replies.push(reply);
+  const repliesById = new Map(replyRows.results.map(reply => [reply.id, reply]));
+  for (const { note_id, reply_to_id, reply_to_created_at, ...reply } of replyRows.results) {
+    const thread = threads.get(note_id);
+    const parent = repliesById.get(reply_to_id);
+    const replyTo = reply_to_id === null
+      ? replyReference("note", thread)
+      : parent?.note_id === note_id && parent.created_at === reply_to_created_at
+        ? replyReference("reply", parent)
+        : { kind: "reply", deleted: true, created_at: reply_to_created_at };
+    thread.replies.push({ ...reply, reply_to: replyTo });
+  }
   return [...threads.values()];
 }
 
@@ -137,9 +153,11 @@ export default {
       return updated ? json(updated) : json({ error: "Message not found" }, 404);
     }
 
-    const { message, replyTo, replyCreatedAt } = data;
+    const { message, replyTo, replyCreatedAt, replyToKind = "note" } = data;
     if (action !== undefined || typeof message !== "string" || !message.trim() || message.length > 500 ||
         (replyTo !== undefined && (!Number.isSafeInteger(replyTo) || replyTo < 1)) ||
+        (replyToKind !== "note" && replyToKind !== "reply") ||
+        (replyToKind === "reply" && (replyTo === undefined || replyCreatedAt === undefined)) ||
         (replyCreatedAt !== undefined && (typeof replyCreatedAt !== "string" || replyCreatedAt.length > 40))) {
       return json({ error: "Invalid message or reply target" }, 400);
     }
@@ -150,11 +168,14 @@ export default {
     const location = visitorLocation(request.cf);
     const createdAt = new Date().toISOString();
     if (replyTo !== undefined) {
-      const result = await env.DB.prepare(
-        `INSERT INTO guestbook_replies (note_id, message, location, created_at, is_owner)
-         SELECT id, ?1, ?2, ?3, ?4 FROM guestbook_notes WHERE id = ?5 AND (?6 IS NULL OR created_at = ?6)`
-      ).bind(message.trim(), location, createdAt, Number(isOwner), replyTo, replyCreatedAt ?? null).run();
-      if (!result.meta.changes) return json({ error: "Note not found" }, 404);
+      const insert = replyToKind === "reply"
+        ? `INSERT INTO guestbook_replies (note_id, message, location, created_at, is_owner, reply_to_id, reply_to_created_at)
+           SELECT note_id, ?1, ?2, ?3, ?4, id, created_at FROM guestbook_replies WHERE id = ?5 AND created_at = ?6`
+        : `INSERT INTO guestbook_replies (note_id, message, location, created_at, is_owner)
+           SELECT id, ?1, ?2, ?3, ?4 FROM guestbook_notes WHERE id = ?5 AND (?6 IS NULL OR created_at = ?6)`;
+      const result = await env.DB.prepare(insert)
+        .bind(message.trim(), location, createdAt, Number(isOwner), replyTo, replyCreatedAt ?? null).run();
+      if (!result.meta.changes) return json({ error: "Reply target not found" }, 404);
     } else {
       await env.DB.prepare("INSERT INTO guestbook_notes (message, location, created_at, is_owner) VALUES (?1, ?2, ?3, ?4)")
         .bind(message.trim(), location, createdAt, Number(isOwner)).run();

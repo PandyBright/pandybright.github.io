@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS guestbook_replies (
   message TEXT NOT NULL,
   location TEXT,
   created_at TEXT NOT NULL,
-  is_owner INTEGER NOT NULL DEFAULT 0 CHECK (is_owner IN (0, 1))
+  is_owner INTEGER NOT NULL DEFAULT 0 CHECK (is_owner IN (0, 1)),
+  reply_to_id INTEGER,
+  reply_to_created_at TEXT
 );
 
 CREATE INDEX IF NOT EXISTS guestbook_replies_note_id ON guestbook_replies(note_id);

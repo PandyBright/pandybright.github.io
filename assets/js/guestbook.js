@@ -13,6 +13,7 @@ if (api) {
   const confirmTitle = confirmation.querySelector("h2");
   const confirmDescription = confirmation.querySelector("p");
   const dateFormat = new Intl.DateTimeFormat(document.documentElement.lang, { dateStyle: "medium" });
+  const replyDateFormat = new Intl.DateTimeFormat(document.documentElement.lang, { dateStyle: "medium", timeStyle: "short" });
   const requestTimeout = 15000;
   const deviceKeyStorage = "pandybright-guestbook-device";
   const voterKeyStorage = "pandybright-guestbook-voter";
@@ -74,19 +75,24 @@ if (api) {
     return voterKey;
   }
 
+  function authorLabel(entry) {
+    const name = entry.is_owner === 1 ? guestbook.dataset.ownerName : "Guest";
+    return entry.location ? `${name} from ${entry.location}` : name;
+  }
+
   function renderMessage(entry, kind) {
     const item = document.createElement("li");
     item.dataset.entryKey = `${entry.id}:${entry.created_at}`;
+    item.id = `guestbook-${kind}-${entry.id}`;
+    item.tabIndex = -1;
     const header = document.createElement("div");
     header.className = "guestbook__byline";
 
     const author = document.createElement("strong");
-    const isOwner = entry.is_owner === 1;
-    const name = isOwner ? guestbook.dataset.ownerName : "Guest";
     author.className = "guestbook__author";
-    if (isOwner) author.append(createOwnerAvatar(28));
+    if (entry.is_owner === 1) author.append(createOwnerAvatar(28));
     const label = document.createElement("span");
-    label.textContent = entry.location ? `${name} from ${entry.location}` : name;
+    label.textContent = authorLabel(entry);
     author.append(label);
 
     const date = document.createElement("time");
@@ -104,10 +110,42 @@ if (api) {
     if (Number.isSafeInteger(entry.id)) {
       const ownerLike = document.createElement("small");
       ownerLike.className = "guestbook__owner-like";
-      ownerLike.textContent = `${guestbook.dataset.ownerName} likes this`;
-      item.append(ownerLike);
+      ownerLike.hidden = true;
+      ownerLike.append(createOwnerAvatar(16), `${guestbook.dataset.ownerName} Likes This`);
+      item.append(ownerLike, renderReplyForm(entry, kind));
+      if (kind === "note") {
+        const replies = document.createElement("ol");
+        replies.className = "guestbook__replies";
+        replies.setAttribute("aria-label", "Replies");
+        item.append(replies);
+      }
     }
     return item;
+  }
+
+  function updateReplyReference(item, target) {
+    const previous = item.querySelector(":scope > .guestbook__reply-reference");
+    if (!target || previous?.dataset.deleted === String(Boolean(target.deleted))) return;
+
+    const reference = document.createElement(target.deleted ? "div" : "a");
+    reference.className = "guestbook__reply-reference";
+    reference.dataset.deleted = String(Boolean(target.deleted));
+    const time = document.createElement("time");
+    time.dateTime = target.created_at;
+    time.textContent = replyDateFormat.format(new Date(target.created_at));
+    const subject = target.deleted ? "a deleted reply" : authorLabel(target);
+    reference.append(`Replying to ${subject} · `, time);
+    if (!target.deleted) {
+      reference.href = `#guestbook-${target.kind}-${target.id}`;
+      const excerpt = document.createElement("span");
+      excerpt.className = "guestbook__reply-excerpt";
+      const text = target.message.replace(/\s+/g, " ").trim();
+      const characters = Array.from(text);
+      excerpt.textContent = characters.length > 100 ? `${characters.slice(0, 100).join("")}…` : text;
+      reference.append(excerpt);
+    }
+    if (previous) previous.replaceWith(reference);
+    else item.querySelector(":scope > .guestbook__byline").after(reference);
   }
 
   function renderActions(item, entry, kind) {
@@ -152,7 +190,7 @@ if (api) {
       confirmTitle.textContent = `Delete this ${kind}?`;
       confirmDescription.textContent = kind === "note"
         ? "The note and all of its replies will be permanently deleted."
-        : "This reply will be permanently deleted.";
+        : "This reply will be permanently deleted. Responses to it will stay in the thread.";
       confirmation.returnValue = "";
       confirmation.showModal();
     });
@@ -193,14 +231,7 @@ if (api) {
     }
   });
 
-  function renderThread(entry) {
-    const item = renderMessage(entry, "note");
-    if (!Number.isSafeInteger(entry.id)) return item;
-
-    const replies = document.createElement("ol");
-    replies.className = "guestbook__replies";
-    replies.setAttribute("aria-label", "Replies");
-
+  function renderReplyForm(entry, kind) {
     const disclosure = document.createElement("details");
     disclosure.className = "guestbook__reply";
     const trigger = document.createElement("summary");
@@ -210,7 +241,7 @@ if (api) {
       if (!disclosure.open || disclosure.querySelector("form")) return;
 
       const replyForm = replyTemplate.cloneNode(true);
-      const messageId = `guestbook-reply-${entry.id}`;
+      const messageId = `guestbook-compose-${kind}-${entry.id}`;
       const field = replyForm.querySelector("textarea");
       field.id = messageId;
       field.value = "";
@@ -226,10 +257,9 @@ if (api) {
       replyForm.querySelector("button[type=submit]").textContent = "Post reply";
       replyForm.querySelector("[data-post-status]").textContent = "";
       disclosure.append(replyForm);
-      setupComposer(replyForm, entry);
+      setupComposer(replyForm, { replyTo: entry.id, replyCreatedAt: entry.created_at, replyToKind: kind });
     });
-    item.append(replies, disclosure);
-    return item;
+    return disclosure;
   }
 
   function renderEntries(container, entries, kind) {
@@ -238,10 +268,11 @@ if (api) {
     let next = container.firstElementChild;
     for (const entry of entries) {
       const key = `${entry.id}:${entry.created_at}`;
-      const item = existing.get(key) ?? (kind === "note" ? renderThread(entry) : renderMessage(entry, kind));
+      const item = existing.get(key) ?? renderMessage(entry, kind);
       existing.delete(key);
       if (Number.isSafeInteger(entry.id)) updateLike(item, entry);
-      const replies = item.querySelector(".guestbook__replies");
+      if (kind === "reply") updateReplyReference(item, entry.reply_to);
+      const replies = item.querySelector(":scope > .guestbook__replies");
       if (replies) renderEntries(replies, entry.replies ?? [], "reply");
       if (item === next) next = next.nextElementSibling;
       else container.insertBefore(item, next);
@@ -321,14 +352,14 @@ if (api) {
       postStatus.textContent = `Posting your ${kind}…`;
 
       try {
-        const response = await send({ message: text, replyTo: parent?.id, replyCreatedAt: parent?.created_at, ownerKey });
+        const response = await send({ message: text, ...parent, ownerKey });
 
         if (response.status === 429) {
           postStatus.textContent = "Please wait a minute before posting another note.";
           return;
         }
         if (response.status === 404 && parent) {
-          postStatus.textContent = "This note is no longer available.";
+          postStatus.textContent = "The message you’re replying to is no longer available. Your draft is still here.";
           return;
         }
         if (response.status === 403 && ownerKey) {

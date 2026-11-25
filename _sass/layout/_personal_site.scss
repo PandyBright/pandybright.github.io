@@ -713,10 +713,20 @@ html[data-theme="dark"] {
   }
 
   .guestbook__owner-like:not([hidden]) {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
     margin-top: 0.35rem;
     color: var(--site-accent-strong);
     font-size: 0.75rem;
+
+    img {
+      flex: none;
+      width: 1em;
+      height: 1em;
+      border-radius: 50%;
+      object-fit: cover;
+    }
   }
 
   .guestbook__confirmation {
@@ -774,6 +784,32 @@ html[data-theme="dark"] {
       padding-top: 0.8rem;
       border-top: 1px solid var(--global-border-color);
     }
+  }
+
+  .guestbook__list li[id] {
+    scroll-margin-top: 5rem;
+
+    &:target {
+      outline: 2px solid var(--site-accent);
+      outline-offset: 3px;
+    }
+  }
+
+  .guestbook__reply-reference {
+    display: block;
+    margin-top: 0.35rem;
+    padding: 0.35rem 0.55rem;
+    border-inline-start: 2px solid var(--site-art-ink);
+    background: var(--site-accent-soft);
+    color: var(--site-accent-strong);
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
+  }
+
+  .guestbook__reply-excerpt {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--global-text-color);
   }
 
   .guestbook__reply {
