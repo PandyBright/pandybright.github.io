@@ -10,6 +10,7 @@ excerpt: >
 collection: portfolio
 ---
 
-<img src="/images/cyb.png"
-     style="max-width: 500px; width: 100%; height: auto; display:block; margin:0.5rem auto;">
+<div class="photo-gallery">
+  <img src="/images/cyb.png" width="5405" height="8108" decoding="async">
+</div>
 

@@ -12,8 +12,9 @@ collection: portfolio
 
 ### 🌌 Shenzhen Observatory — Urban Astronomy in the Heart of the City
 
-<img src="/images/08.png"
-     style="max-width: 1000px; width: 100%; height: auto; display:block; margin:0.5rem auto;">
+<div class="photo-gallery">
+  <img class="photo-gallery__wide" src="/images/08.png" width="8288" height="5520" decoding="async">
+</div>
 
 Located on the outskirts of Shenzhen, the Shenzhen Observatory blends scientific exploration with natural tranquility.  
 This photograph captures the unique contrast between the quiet astronomical facility and the rapidly developing city surrounding it.  

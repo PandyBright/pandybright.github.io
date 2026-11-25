@@ -10,5 +10,6 @@ excerpt: >
 collection: portfolio
 ---
 
-<img src="/images/songshanhu.png"
-     style="max-width: 1000px; width: 100%; height: auto; display:block; margin:0.5rem auto;">
+<div class="photo-gallery">
+  <img class="photo-gallery__wide" src="/images/songshanhu.png" width="4032" height="3024" decoding="async">
+</div>

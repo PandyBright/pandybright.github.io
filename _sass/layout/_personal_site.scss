@@ -1110,16 +1110,23 @@ html[data-theme="dark"] {
 }
 
 .photo-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  align-items: start;
-  gap: 0.9rem;
+  --photo-gap: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--photo-gap);
 
-  img {
+  > img {
     display: block;
-    width: 100%;
+    flex: none;
+    width: calc((100% - var(--photo-gap)) / 2);
     height: auto;
     border-radius: 0.25rem;
+
+    &.photo-gallery__wide {
+      width: 100%;
+    }
   }
 }
 
