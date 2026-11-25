@@ -19,6 +19,20 @@
       font-size: 0.75rem;
     }
     #points { position: absolute; inset: 0; touch-action: manipulation; }
+    #map-controls {
+      position: absolute;
+      top: 0.45rem;
+      right: 0.45rem;
+      z-index: 2;
+      padding: 0.3rem 0.42rem;
+      border-radius: 0.35rem;
+      background: #ffffffd9;
+      color: #142449;
+      font-size: 0.72rem;
+      line-height: 1.2;
+      box-shadow: 0 1px 5px #14244933;
+    }
+    #magnifier-toggle { margin: 0 0.22rem 0 0; vertical-align: -1px; accent-color: #6e72e8; }
     .map-point {
       position: absolute;
       width: 24px;
@@ -72,6 +86,7 @@
 </head>
 <body>
   <img id="map" src="./visitor-world.png" alt="World map" width="640" height="320">
+  <label id="map-controls"><input id="magnifier-toggle" type="checkbox"> Magnify on hover</label>
   <p id="status" role="status">Loading visitor points…</p>
   <div id="points" role="group" aria-label="Visitor locations"></div>
   <canvas id="map-lens" width="208" height="208" aria-hidden="true" hidden></canvas>
@@ -81,12 +96,14 @@
     const statusMessage = document.querySelector("#status");
     const mapImage = document.querySelector("#map");
     const pointLayer = document.querySelector("#points");
+    const magnifierToggle = document.querySelector("#magnifier-toggle");
     const lens = document.querySelector("#map-lens");
     const lensContext = lens.getContext("2d");
     const cityLabel = document.querySelector("#city-label");
     const markers = new Map();
     const markerPositions = new Map();
     let activeMarker;
+    let magnifierEnabled = false;
 
     function showCity(button) {
       if (activeMarker === button && cityLabel.textContent === button.getAttribute("aria-label")) return;
@@ -135,7 +152,7 @@
     }
 
     function magnify(event) {
-      if (!lensContext || !mapImage.naturalWidth) return;
+      if (!magnifierEnabled || !lensContext || !mapImage.naturalWidth) return;
       const bounds = mapImage.getBoundingClientRect();
       const x = event.clientX - bounds.left;
       const y = event.clientY - bounds.top;
@@ -248,13 +265,18 @@
 
     function hideLens() { lens.hidden = true; }
 
+    magnifierToggle.addEventListener("change", () => {
+      magnifierEnabled = magnifierToggle.checked;
+      if (!magnifierEnabled) hideLens();
+    });
+
     window.addEventListener("resize", () => {
       hideCity();
       hideLens();
     });
     pointLayer.addEventListener("pointermove", event => {
       if (event.pointerType !== "touch") selectPoint(event);
-      if (event.pointerType === "mouse") magnify(event);
+      if (event.pointerType === "mouse" && magnifierEnabled) magnify(event);
     });
     pointLayer.addEventListener("pointerleave", () => {
       hideLens();
