@@ -34,8 +34,9 @@ My earlier research focused on the robustness of autonomous driving perception, 
 ## Recent Updates {#news}
 
 <div class="guestbook-stamp">
-  <a href="{{ '/guestbook/' | relative_url }}" aria-label="Open Xiaoyu’s guestbook" title="Xiaoyu’s Guestbook">
+  <a href="{{ '/guestbook/' | relative_url }}" aria-label="Leave a note in Xiaoyu’s guestbook">
     <img src="{{ '/assets/xiaoyu.webp' | relative_url }}" width="44" height="44" alt="">
+    <span class="guestbook-stamp__hint" aria-hidden="true">Leave a note</span>
   </a>
 </div>
 
