@@ -15,6 +15,7 @@ if (api) {
   const dateFormat = new Intl.DateTimeFormat(document.documentElement.lang, { dateStyle: "medium" });
   const replyDateFormat = new Intl.DateTimeFormat(document.documentElement.lang, { dateStyle: "medium", timeStyle: "short" });
   const requestTimeout = 15000;
+  const visibleReplies = 3;
   const deviceKeyStorage = "pandybright-guestbook-device";
   const voterKeyStorage = "pandybright-guestbook-voter";
   let ownerKey;
@@ -23,6 +24,7 @@ if (api) {
   let ownerTitleAvatar;
   let pendingDeletion;
   let latestLoad = 0;
+  let firstEntriesLoaded = false;
 
   try {
     ownerKey = localStorage.getItem(deviceKeyStorage) || undefined;
@@ -111,21 +113,58 @@ if (api) {
     content.append(note);
     item.append(header, content);
     if (Number.isSafeInteger(entry.id)) {
-      const { trigger, composer } = renderReplyForm(entry, kind);
+      const { trigger, composer } = renderReplyForm(item, entry, kind);
       content.append(trigger);
       const ownerLike = document.createElement("small");
       ownerLike.className = "guestbook__owner-like";
       ownerLike.hidden = true;
       ownerLike.append(createOwnerAvatar(16), `${guestbook.dataset.ownerName} Likes This`);
       item.append(ownerLike, composer);
-      if (kind === "note") {
-        const replies = document.createElement("ol");
-        replies.className = "guestbook__replies";
-        replies.setAttribute("aria-label", "Replies");
-        item.append(replies);
-      }
+      if (kind === "note") appendReplyList(item);
     }
     return item;
+  }
+
+  function appendReplyList(note) {
+    const replies = document.createElement("ol");
+    replies.id = `${note.id}-replies`;
+    replies.className = "guestbook__replies";
+    replies.setAttribute("aria-label", "Replies");
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "guestbook__replies-toggle";
+    toggle.hidden = true;
+    toggle.setAttribute("aria-controls", replies.id);
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.addEventListener("click", () => updateReplyVisibility(note, toggle.getAttribute("aria-expanded") !== "true"));
+    note.append(toggle, replies);
+  }
+
+  function updateReplyVisibility(note, expanded) {
+    const replies = note.querySelector(":scope > .guestbook__replies");
+    const toggle = note.querySelector(":scope > .guestbook__replies-toggle");
+    if (expanded === undefined) expanded = toggle.getAttribute("aria-expanded") === "true";
+    const extra = replies.children.length - visibleReplies;
+    for (const [index, reply] of Array.from(replies.children).entries()) {
+      reply.hidden = !expanded && index >= visibleReplies;
+    }
+    toggle.hidden = extra <= 0;
+    toggle.setAttribute("aria-expanded", expanded);
+    if (extra > 0) {
+      toggle.textContent = expanded ? "Show fewer replies" : `Show ${extra} more ${extra === 1 ? "reply" : "replies"}`;
+    }
+  }
+
+  function revealLinkedEntry(hash) {
+    if (!/^#guestbook-(?:note|reply)-\d+$/.test(hash)) return;
+    const entry = document.getElementById(hash.slice(1));
+    if (entry?.hidden) updateReplyVisibility(entry.closest(".guestbook__list > li"), true);
+    return entry;
+  }
+
+  function scrollToLinkedEntry() {
+    revealLinkedEntry(location.hash)?.scrollIntoView();
   }
 
   function updateReplyReference(item, target) {
@@ -142,6 +181,7 @@ if (api) {
     reference.append(`Replying to ${subject} · `, time);
     if (!target.deleted) {
       reference.href = `#guestbook-${target.kind}-${target.id}`;
+      reference.addEventListener("click", () => revealLinkedEntry(reference.hash));
       const excerpt = document.createElement("span");
       excerpt.className = "guestbook__reply-excerpt";
       const text = target.message.replace(/\s+/g, " ").trim();
@@ -226,7 +266,9 @@ if (api) {
     try {
       const response = await send({ action: "delete", ...target, ownerKey });
       if (!response.ok) throw new Error(`Guestbook returned ${response.status}`);
+      const thread = target.kind === "reply" ? item.closest(".guestbook__list > li") : null;
       item.remove();
+      if (thread) updateReplyVisibility(thread);
       refresh.focus();
       await loadEntries();
     } catch {
@@ -236,7 +278,7 @@ if (api) {
     }
   });
 
-  function renderReplyForm(entry, kind) {
+  function renderReplyForm(item, entry, kind) {
     const messageId = `guestbook-compose-${kind}-${entry.id}`;
     const composer = document.createElement("div");
     composer.className = "guestbook__reply-form";
@@ -281,6 +323,9 @@ if (api) {
           (composer.contains(document.activeElement) || document.activeElement === document.body);
         setExpanded(false);
         if (restoreFocus) trigger.focus({ preventScroll: true });
+        const note = item.closest(".guestbook__list > li");
+        const replies = note?.querySelector(":scope > .guestbook__replies");
+        if (replies?.children.length >= visibleReplies) updateReplyVisibility(note, true);
         actionStatus.textContent = "Your reply was posted.";
       });
     });
@@ -298,7 +343,10 @@ if (api) {
       if (Number.isSafeInteger(entry.id)) updateLike(item, entry);
       if (kind === "reply") updateReplyReference(item, entry.reply_to);
       const replies = item.querySelector(":scope > .guestbook__replies");
-      if (replies) renderEntries(replies, entry.replies ?? [], "reply");
+      if (replies) {
+        renderEntries(replies, entry.replies ?? [], "reply");
+        updateReplyVisibility(item);
+      }
       if (item === next) next = next.nextElementSibling;
       else container.insertBefore(item, next);
     }
@@ -320,6 +368,10 @@ if (api) {
       if (load !== latestLoad) return;
       setOwnerState(data.isOwner === true);
       renderEntries(list, entries, "note");
+      if (!firstEntriesLoaded) {
+        firstEntriesLoaded = true;
+        scrollToLinkedEntry();
+      }
       listStatus.textContent = entries.length ? "" : "No notes yet. Say hello!";
     } catch {
       if (load === latestLoad) listStatus.textContent = "Visitor notes are temporarily unavailable. Try Refresh.";
@@ -416,5 +468,6 @@ if (api) {
   setupComposer(form);
   refresh.hidden = false;
   refresh.addEventListener("click", loadEntries);
+  window.addEventListener("hashchange", scrollToLinkedEntry);
   loadEntries();
 }
