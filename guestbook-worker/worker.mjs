@@ -29,8 +29,10 @@ async function parseMessage(request) {
   }
 
   try {
-    const message = JSON.parse(body + decoder.decode())?.message;
-    return typeof message === "string" && message.trim() && message.length <= 500 ? message.trim() : null;
+    const { message, replyTo } = JSON.parse(body + decoder.decode()) ?? {};
+    if (typeof message !== "string" || !message.trim() || message.length > 500) return null;
+    if (replyTo !== undefined && (!Number.isSafeInteger(replyTo) || replyTo < 1)) return null;
+    return { message: message.trim(), replyTo };
   } catch {
     return null;
   }
@@ -54,10 +56,15 @@ export default {
     }
 
     if (request.method === "GET") {
-      const { results } = await env.DB.prepare(
-        "SELECT message, location, created_at FROM guestbook_notes ORDER BY id DESC LIMIT 50"
-      ).all();
-      return json(results);
+      const recent = "SELECT id FROM guestbook_notes ORDER BY id DESC LIMIT 50";
+      const [notes, replies] = await env.DB.batch([
+        env.DB.prepare("SELECT id, message, location, created_at FROM guestbook_notes ORDER BY id DESC LIMIT 50"),
+        env.DB.prepare(`SELECT note_id, message, location, created_at FROM guestbook_replies
+          WHERE note_id IN (${recent}) ORDER BY id`),
+      ]);
+      const threads = new Map(notes.results.map(note => [note.id, { ...note, replies: [] }]));
+      for (const { note_id, ...reply } of replies.results) threads.get(note_id).replies.push(reply);
+      return json([...threads.values()]);
     }
 
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -67,12 +74,20 @@ export default {
     const { success } = await env.POST_LIMIT.limit({ key: ip });
     if (!success) return json({ error: "Too many notes" }, 429);
 
-    const message = await parseMessage(request);
-    if (!message) return json({ error: "A message of 1–500 characters is required" }, 400);
+    const data = await parseMessage(request);
+    if (!data) return json({ error: "Invalid message or reply target" }, 400);
 
     const location = visitorLocation(request.cf);
-    await env.DB.prepare("INSERT INTO guestbook_notes (message, location, created_at) VALUES (?1, ?2, ?3)")
-      .bind(message, location, new Date().toISOString()).run();
+    const createdAt = new Date().toISOString();
+    if (data.replyTo !== undefined) {
+      const result = await env.DB.prepare(
+        "INSERT INTO guestbook_replies (note_id, message, location, created_at) SELECT id, ?1, ?2, ?3 FROM guestbook_notes WHERE id = ?4"
+      ).bind(data.message, location, createdAt, data.replyTo).run();
+      if (!result.meta.changes) return json({ error: "Note not found" }, 404);
+    } else {
+      await env.DB.prepare("INSERT INTO guestbook_notes (message, location, created_at) VALUES (?1, ?2, ?3)")
+        .bind(data.message, location, createdAt).run();
+    }
     return json({ ok: true }, 201);
   },
 };

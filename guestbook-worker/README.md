@@ -11,6 +11,6 @@ npx wrangler d1 execute pandybright-guestbook --remote --file=schema.sql
 npx wrangler deploy
 ```
 
-Set `guestbook_api` in the site’s `_config.yml` to the deployed Worker URL ending in `/api/guestbook`, then rebuild the site. The posting form is available when this setting has a value.
+The site uses `https://pandybright-guestbook.pages.dev/api/guestbook` because mainland China probes could not reach the default Worker hostname. The Cloudflare Pages project uses the script in `pages/_worker.js` and a production service binding named `GUESTBOOK` that points at the Worker. Updating the Worker does not require redeploying Pages unless the forwarding script or its binding changes.
 
-The site displays the latest 50 notes. To remove a note, find its row in the Cloudflare D1 dashboard and delete it using its ID.
+The site displays the latest 50 notes with their replies. To remove a reply, delete its row from `guestbook_replies`. Deleting a note from `guestbook_notes` also removes its replies. For an existing database, run the schema command above before deploying the Worker to add reply storage.

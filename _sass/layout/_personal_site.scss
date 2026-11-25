@@ -640,6 +640,41 @@ html[data-theme="dark"] {
   .guestbook__byline {
     color: var(--site-accent-strong);
   }
+
+  .guestbook__replies {
+    margin: 0.75rem 0 0;
+    padding: 0 0 0 0.75rem;
+    border-inline-start: 2px solid var(--site-art-ink);
+    list-style: none;
+
+    &:empty {
+      display: none;
+    }
+
+    > li + li {
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid var(--global-border-color);
+    }
+  }
+
+  .guestbook__reply {
+    margin-top: 0.35rem;
+
+    summary {
+      width: fit-content;
+      min-height: 44px;
+      padding: 0.65rem 0.25rem;
+      color: var(--site-accent-strong);
+      font-size: 0.85rem;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .guestbook__form {
+      padding: 0.65rem 0;
+    }
+  }
 }
 
 .home-updates {
