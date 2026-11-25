@@ -15,7 +15,7 @@ if (api) {
   const dateFormat = new Intl.DateTimeFormat(document.documentElement.lang, { dateStyle: "medium" });
   const replyDateFormat = new Intl.DateTimeFormat(document.documentElement.lang, { dateStyle: "medium", timeStyle: "short" });
   const requestTimeout = 15000;
-  const visibleReplies = 3;
+  const visibleReplies = 1;
   const deviceKeyStorage = "pandybright-guestbook-device";
   const voterKeyStorage = "pandybright-guestbook-voter";
   let ownerKey;
