@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'self' https://pandybright.github.io https://service.supercounters.com; img-src 'self' https://pandybright.github.io; connect-src 'self' https://pandybright.github.io; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'self' https://pandybright.github.io; img-src 'self' https://pandybright.github.io; connect-src 'self' https://pandybright.github.io; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
   <title>Visitor Map</title>
   <style>
     body { margin: 0; overflow: hidden; color-scheme: light dark; font: 14px system-ui, sans-serif; }
@@ -18,7 +18,7 @@
       text-align: center;
       font-size: 0.75rem;
     }
-    #points { position: absolute; inset: 0; pointer-events: none; }
+    #points { position: absolute; inset: 0; touch-action: manipulation; }
     .map-point {
       position: absolute;
       width: 24px;
@@ -28,9 +28,7 @@
       border-radius: 50%;
       background: transparent;
       transform: translate(-50%, -50%);
-      cursor: pointer;
-      pointer-events: auto;
-      touch-action: manipulation;
+      pointer-events: none;
     }
     .map-point::before {
       display: block;
@@ -42,8 +40,19 @@
       background: #f25a65;
       content: "";
     }
-    .map-point:hover::before, .map-point:focus-visible::before {
+    .map-point[data-active]::before, .map-point:focus-visible::before {
       box-shadow: 0 0 0 3px #fff8;
+    }
+    #map-lens {
+      position: absolute;
+      width: 104px;
+      height: 104px;
+      box-sizing: border-box;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: #e4eef8;
+      box-shadow: 0 2px 12px #14244955;
+      pointer-events: none;
     }
     #city-label {
       position: absolute;
@@ -65,19 +74,25 @@
   <img id="map" src="./visitor-world.png" alt="World map" width="640" height="320">
   <p id="status" role="status">Loading visitor points…</p>
   <div id="points" role="group" aria-label="Visitor locations"></div>
+  <canvas id="map-lens" width="208" height="208" aria-hidden="true" hidden></canvas>
   <div id="city-label" aria-hidden="true" hidden></div>
-  <script src="./visitor-locations.js?v=2"></script>
+  <script src="./visitor-locations.js?v=3"></script>
   <script>
-    var sc_map_var = [];
-
     const statusMessage = document.querySelector("#status");
+    const mapImage = document.querySelector("#map");
     const pointLayer = document.querySelector("#points");
+    const lens = document.querySelector("#map-lens");
+    const lensContext = lens.getContext("2d");
     const cityLabel = document.querySelector("#city-label");
     const markers = new Map();
+    const markerPositions = new Map();
     let activeMarker;
 
     function showCity(button) {
+      if (activeMarker === button && cityLabel.textContent === button.getAttribute("aria-label")) return;
+      activeMarker?.removeAttribute("data-active");
       activeMarker = button;
+      button.setAttribute("data-active", "");
       cityLabel.textContent = button.getAttribute("aria-label");
       cityLabel.hidden = false;
       const marker = button.getBoundingClientRect();
@@ -87,6 +102,64 @@
       const top = above < 4 ? marker.bottom + 1 : above;
       cityLabel.style.left = left + "px";
       cityLabel.style.top = Math.max(4, Math.min(top, innerHeight - cityLabel.offsetHeight - 4)) + "px";
+    }
+
+    function hideCity() {
+      activeMarker?.removeAttribute("data-active");
+      activeMarker = undefined;
+      cityLabel.hidden = true;
+    }
+
+    // Pick the closest visible dot so a larger hit area cannot hide a neighboring city.
+    function pointAt(event) {
+      const radius = event.pointerType === "touch" ? 18 : 12;
+      const bounds = pointLayer.getBoundingClientRect();
+      let distance = radius ** 2;
+      let closest;
+      for (const [button, position] of markerPositions) {
+        const x = bounds.left + position.left / 100 * bounds.width;
+        const y = bounds.top + position.top / 100 * bounds.height;
+        const offset = (x - event.clientX) ** 2 + (y - event.clientY) ** 2;
+        if (offset >= distance) continue;
+        closest = button;
+        distance = offset;
+      }
+      return closest;
+    }
+
+    function selectPoint(event) {
+      const point = pointAt(event);
+      pointLayer.style.cursor = point ? "pointer" : "";
+      if (point) showCity(point);
+      else hideCity();
+    }
+
+    function magnify(event) {
+      if (!lensContext || !mapImage.naturalWidth) return;
+      const bounds = mapImage.getBoundingClientRect();
+      const x = event.clientX - bounds.left;
+      const y = event.clientY - bounds.top;
+      const radius = lens.width / 2;
+      const scale = 3;
+      const left = radius - x * scale;
+      const top = radius - y * scale;
+      lensContext.clearRect(0, 0, lens.width, lens.height);
+      lensContext.drawImage(mapImage, left, top, bounds.width * scale, bounds.height * scale);
+      for (const [marker, position] of markerPositions) {
+        const dotX = left + position.left / 100 * bounds.width * scale;
+        const dotY = top + position.top / 100 * bounds.height * scale;
+        if (Math.hypot(dotX - radius, dotY - radius) > radius + 12) continue;
+        lensContext.beginPath();
+        lensContext.arc(dotX, dotY, marker === activeMarker ? 11 : 9, 0, 2 * Math.PI);
+        lensContext.fillStyle = "#f25a65";
+        lensContext.strokeStyle = "#fff";
+        lensContext.lineWidth = 3;
+        lensContext.fill();
+        lensContext.stroke();
+      }
+      lens.hidden = false;
+      lens.style.left = Math.max(0, Math.min(x - lens.offsetWidth / 2, bounds.width - lens.offsetWidth)) + "px";
+      lens.style.top = Math.max(0, Math.min(y - lens.offsetHeight / 2, bounds.height - lens.offsetHeight)) + "px";
     }
 
     function renderLocations(history, recent, capturedAt) {
@@ -101,18 +174,17 @@
           button = document.createElement("button");
           button.className = "map-point";
           button.type = "button";
-          button.style.left = ((lo + 180) / 3.6) + "%";
-          button.style.top = ((90 - la) / 1.8) + "%";
-          button.addEventListener("pointerenter", () => showCity(button));
-          button.addEventListener("pointerleave", (event) => {
-            if (event.pointerType !== "touch" && document.activeElement !== button) cityLabel.hidden = true;
-          });
           button.addEventListener("focus", () => showCity(button));
-          button.addEventListener("blur", () => { cityLabel.hidden = true; });
+          button.addEventListener("blur", hideCity);
           button.addEventListener("click", () => showCity(button));
           markers.set(key, button);
           pointLayer.append(button);
         }
+        const left = Math.max(0.6, Math.min(99.4, (lo + 180) / 3.6));
+        const top = Math.max(1.2, Math.min(98.8, (90 - la) / 1.8));
+        button.style.left = left + "%";
+        button.style.top = top + "%";
+        markerPositions.set(button, { left, top });
         const visits = count === 1 ? "1 visit" : `${count} visits`;
         button.setAttribute("aria-label", count ? `${visits} from ${address}${asOf}` : address);
       }
@@ -130,27 +202,22 @@
       } catch { /* The other map data sources can still be displayed. */ }
     }
 
-    function fetchRecentPoints() {
+    function receiveLivePoints() {
+      if (parent === window) return Promise.resolve(null);
       return new Promise(resolve => {
-        const timeout = setTimeout(() => resolve([]), 20000);
-        // Supercounters sends the newest coordinates through this callback.
-        window.sc_show_map = (id, payload) => {
-          if (id !== 1741601 || typeof payload !== "string") return;
+        const timeout = setTimeout(() => {
+          window.removeEventListener("message", receive);
+          resolve(null);
+        }, 12000);
+        function receive(event) {
+          if (event.source !== parent || event.origin !== location.origin || !event.data ||
+              !("visitorPoints" in Object(event.data))) return;
           clearTimeout(timeout);
-          try {
-            const points = JSON.parse(payload.slice(1, -1));
-            resolve(Array.isArray(points) ? points : []);
-          } catch {
-            resolve([]);
-          }
-        };
-        const counter = document.createElement("script");
-        counter.src = "https://service.supercounters.com/fc.php?id=1741601&w=4&rand=" + Date.now();
-        counter.addEventListener("error", () => {
-          clearTimeout(timeout);
-          resolve([]);
-        });
-        document.head.append(counter);
+          window.removeEventListener("message", receive);
+          resolve(event.data.visitorPoints);
+        }
+        window.addEventListener("message", receive);
+        parent.postMessage("visitor-map-ready", location.origin);
       });
     }
 
@@ -168,20 +235,39 @@
         return [...archived, ...snapshot.locations.map(({ la, lo, address }) => ({ la, lo, address }))];
       });
 
-    // City names, centroids and provinces are adapted from GeoNames (CC BY 4.0).
-    Promise.all([savedLocations, fetchRecentPoints(), fetchMapData("visitor-cities.json", 30000)])
-      .then(([history, points, cities]) => {
-        const recent = Array.isArray(cities) ? groupVisitorPoints(points, cities) : [];
-        if (recent.some(location => location.count > 0)) renderLocations(history, recent);
+    const liveLocations = receiveLivePoints().then(async points => {
+      if (!Array.isArray(points) || !points.length) return [];
+      const [cities, regions] = await Promise.all([fetchMapData("visitor-cities.json", 30000), fetchMapData("visitor-regions.json")]);
+      return groupVisitorPoints(points, cities ?? [], regions ?? {});
+    });
+    Promise.all([savedLocations, liveLocations])
+      .then(([history, recent]) => {
+        if (recent.length) renderLocations(history, recent);
         if (!markers.size) statusMessage.textContent = "No visitor locations available.";
       });
 
-    window.addEventListener("resize", () => { cityLabel.hidden = true; });
-    document.addEventListener("click", (event) => {
-      if (!event.target.closest(".map-point")) cityLabel.hidden = true;
+    function hideLens() { lens.hidden = true; }
+
+    window.addEventListener("resize", () => {
+      hideCity();
+      hideLens();
+    });
+    pointLayer.addEventListener("pointermove", event => {
+      if (event.pointerType !== "touch") selectPoint(event);
+      if (event.pointerType === "mouse") magnify(event);
+    });
+    pointLayer.addEventListener("pointerleave", () => {
+      hideLens();
+      if (document.activeElement !== activeMarker) hideCity();
+    });
+    pointLayer.addEventListener("click", event => {
+      if (event.target === pointLayer) selectPoint(event);
     });
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") cityLabel.hidden = true;
+      if (event.key === "Escape") {
+        hideCity();
+        hideLens();
+      }
     });
   </script>
 </body>

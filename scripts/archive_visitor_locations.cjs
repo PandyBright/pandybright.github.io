@@ -3,6 +3,7 @@ const path = require("node:path");
 const { resolveVisitorLocation, visitorLocationKey, groupVisitorPoints } = require("../assets/visitor-locations.js");
 
 const cities = require("../assets/visitor-cities.json");
+const regions = require("../assets/visitor-regions.json");
 const archivePath = path.join(__dirname, "../assets/visitor-history.json");
 const snapshotPath = path.join(__dirname, "../assets/visitor-recent.json");
 
@@ -30,7 +31,12 @@ async function fetchLiveLocations() {
   return points.flatMap(point => {
     if (!Array.isArray(point?.latLng)) return [];
     const [la, lo] = point.latLng;
-    const location = resolveVisitorLocation({ la, lo }, cities);
+    const [code, label] = typeof point.name === "string" ? point.name.split("|") : [];
+    const countryCode = code?.toUpperCase();
+    const parts = label?.split(",").map(part => part.trim()).filter(Boolean) ?? [];
+    const city = parts.length > 1 ? parts[0] : undefined;
+    const area = parts.length > 2 ? parts[1] : undefined;
+    const location = resolveVisitorLocation({ la, lo, countryCode, city, area }, cities, regions);
     return location ? [location] : [];
   });
 }

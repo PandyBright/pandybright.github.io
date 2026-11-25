@@ -59,9 +59,8 @@ My earlier research focused on the robustness of autonomous driving perception, 
   <div class="visitor-map">
     <iframe src="{{ '/assets/visitor-map.html' | relative_url }}?v={{ site.time | date: '%s' }}"
             title="Approximate visitor locations" loading="lazy" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
-    <a href="https://www.supercounters.com/map/1741601" target="_blank" rel="noopener noreferrer">
-      Supercounters <span aria-hidden="true">↗</span>
-    </a>
-    <span> · <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer" title="City data by GeoNames (CC BY 4.0)">GeoNames</a></span>
+    <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer" title="City data by GeoNames (CC BY 4.0)">GeoNames</a>
+    <span> · <a href="https://github.com/mledoze/countries" target="_blank" rel="noopener noreferrer" title="Country and territory coordinates (ODbL)">Country and territory data</a></span>
   </div>
 </section>
+<script src="{{ '/assets/visitor-tracking.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

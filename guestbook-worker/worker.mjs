@@ -29,6 +29,46 @@ function visitorLocation(geo) {
   return city && city !== country ? `${city}, ${country}` : country;
 }
 
+const mapLocations = `SELECT country AS countryCode, city, area, la, lo, COUNT(recent.id) AS count
+  FROM visitor_map_places places LEFT JOIN visitor_map_recent recent ON recent.place = places.id
+  GROUP BY places.id ORDER BY places.id`;
+
+function mapCoordinate(value, bound) {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const number = Number(value);
+  return Number.isFinite(number) && Math.abs(number) <= bound ? Math.round(number * 100) / 100 : null;
+}
+
+async function visitorMap(request, env, origin, json) {
+  const list = env.DB.prepare(mapLocations);
+  if (request.method === "GET") return json({ points: (await list.all()).results });
+  if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (origin !== env.SITE_ORIGIN) return json({ error: "Forbidden origin" }, 403);
+
+  const geo = request.cf;
+  if (!visitorLocation(geo) || geo.country === "ZZ") return json({ points: (await list.all()).results });
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const { success } = await env.POST_LIMIT.limit({ key: `map:${ip}` });
+  if (!success) return json({ points: (await list.all()).results });
+
+  const country = geo.country;
+  const city = typeof geo.city === "string" ? geo.city.trim().slice(0, 100) : "";
+  const area = typeof geo.region === "string" ? geo.region.trim().slice(0, 100) : "";
+  const latitude = mapCoordinate(geo.latitude, 90);
+  const longitude = mapCoordinate(geo.longitude, 180);
+  const la = longitude === null ? null : latitude;
+  const lo = latitude === null ? null : longitude;
+  const place = JSON.stringify([country, city, area, la, lo]);
+  const [, , , locations] = await env.DB.batch([
+    env.DB.prepare("INSERT OR IGNORE INTO visitor_map_places (id, country, city, area, la, lo) VALUES (?1, ?2, ?3, ?4, ?5, ?6)")
+      .bind(place, country, city, area, la, lo),
+    env.DB.prepare("INSERT INTO visitor_map_recent (place) VALUES (?1)").bind(place),
+    env.DB.prepare("DELETE FROM visitor_map_recent WHERE id <= (SELECT id FROM visitor_map_recent ORDER BY id DESC LIMIT 1 OFFSET 50)"),
+    list,
+  ]);
+  return json({ points: locations.results, recorded: true });
+}
+
 async function parseRequest(request) {
   if (!request.headers.get("Content-Type")?.startsWith("application/json") || !request.body) return null;
 
@@ -107,7 +147,8 @@ export default {
     if (origin === env.SITE_ORIGIN) headers["Access-Control-Allow-Origin"] = origin;
     const json = (body, status = 200) => Response.json(body, { status, headers });
 
-    if (new URL(request.url).pathname !== "/api/guestbook") return json({ error: "Not found" }, 404);
+    const url = new URL(request.url);
+    if (url.pathname !== "/api/guestbook") return json({ error: "Not found" }, 404);
     if (origin && origin !== env.SITE_ORIGIN) return json({ error: "Forbidden origin" }, 403);
 
     if (request.method === "OPTIONS") {
@@ -117,6 +158,7 @@ export default {
       });
     }
 
+    if (url.searchParams.get("visitor-map") === "1") return visitorMap(request, env, origin, json);
     if (request.method === "GET") return json(await listEntries(env.DB, null));
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
     if (origin !== env.SITE_ORIGIN) return json({ error: "Forbidden origin" }, 403);

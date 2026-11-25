@@ -15,5 +15,10 @@
   {"la":45.499,"lo":-73.5705,"address":"Ville-Marie, Canada"},
   {"la":43.6533,"lo":-79.3839,"address":"Toronto, Canada"},
   {"la":35.67,"lo":139.7754,"address":"Chuo, Japan"},
-  {"la":47.6062,"lo":-122.3321,"address":"Seattle, United States"}
+  {"la":47.6062,"lo":-122.3321,"address":"Seattle, United States"},
+  {"la":25.0531,"lo":121.5264,"address":"Taipei, Taiwan"},
+  {"la":35.6895,"lo":139.6917,"address":"Tokyo, Japan"},
+  {"la":31.2222,"lo":121.4581,"address":"Shanghai, China"},
+  {"la":22.5455,"lo":114.0683,"address":"Shenzhen, Guangdong, China"},
+  {"la":22.3833,"lo":114.1833,"address":"Sha Tin, NT, Hong Kong"}
 ]

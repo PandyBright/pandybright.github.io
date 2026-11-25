@@ -15,6 +15,12 @@ The site uses `https://pandybright-guestbook.pages.dev/api/guestbook` because ma
 
 The site displays the latest 50 notes with their replies. To remove a reply, delete its row from `guestbook_replies`. Deleting a note from `guestbook_notes` also removes its replies. For an existing database, run the schema command above before deploying the Worker to add reply storage.
 
+The homepage visitor map uses the same Worker through `/api/guestbook?visitor-map=1`. Apply `visitor-map.sql` before deploying the map route. It stores approximate places and the latest 50 visits in separate tables. Older visits retain their place on the map. The map tables contain no IP addresses or browser identifiers. The original `assets/visitor-history.json` provides historical points, including places recovered from publicly displayed guestbook locations, without inferring visit counts. `assets/visitor-regions.json` adapts country and territory coordinates from [Countries](https://github.com/mledoze/countries) under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/).
+
+```sh
+npx wrangler d1 execute pandybright-guestbook --remote --file=visitor-map.sql
+```
+
 For an existing database created before owner attribution, run `npx wrangler d1 execute pandybright-guestbook --remote --file=owner-attribution.sql` once before deploying this version of the Worker. A new database initialized from `schema.sql` already has these columns.
 
 For an existing database, apply `likes.sql` with `npx wrangler d1 execute pandybright-guestbook --remote --file=likes.sql` before deploying the star reactions. Stars use the hash of a random browser key or the verified owner identity. Deleting a note removes its stars, replies, and reply stars.
