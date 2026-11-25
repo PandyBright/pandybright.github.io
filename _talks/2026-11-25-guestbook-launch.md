@@ -1,5 +1,5 @@
 ---
-title: "Xiaoyu’s Guestbook Is Open · 小玉留言板开通啦"
+title: "The Guestbook Is Open"
 type: "Announcement"
 permalink: /updates/guestbook-launch/
 date: 2026-11-25
