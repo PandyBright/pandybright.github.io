@@ -47,8 +47,8 @@
     }
     .map-point::before {
       display: block;
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       margin: auto;
       border: 1px solid #fff;
       border-radius: 50%;
@@ -168,7 +168,7 @@
         const dotY = top + position.top / 100 * bounds.height * scale;
         if (Math.hypot(dotX - radius, dotY - radius) > radius + 12) continue;
         lensContext.beginPath();
-        lensContext.arc(dotX, dotY, marker === activeMarker ? 11 : 9, 0, 2 * Math.PI);
+        lensContext.arc(dotX, dotY, marker === activeMarker ? 9.5 : 7.5, 0, 2 * Math.PI);
         lensContext.fillStyle = "#f25a65";
         lensContext.strokeStyle = "#fff";
         lensContext.lineWidth = 3;
