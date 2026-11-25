@@ -451,6 +451,15 @@ html[data-theme="dark"] {
   }
 }
 
+.guestbook__title-avatar {
+  width: 34px;
+  height: 34px;
+  margin-inline-start: 0.35em;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
 .guestbook {
   max-width: 45rem;
 
@@ -652,14 +661,6 @@ html[data-theme="dark"] {
       height: 28px;
       border-radius: 50%;
       object-fit: cover;
-    }
-  }
-
-  .guestbook__device {
-    margin-top: 1.5rem;
-
-    code {
-      overflow-wrap: anywhere;
     }
   }
 

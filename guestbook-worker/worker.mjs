@@ -79,14 +79,15 @@ export default {
     if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
     if (origin !== env.SITE_ORIGIN) return json({ error: "Forbidden origin" }, 403);
 
+    const data = await parseMessage(request);
+    if (!data) return json({ error: "Invalid message or reply target" }, 400);
+    if (data.verifyDevice) return json({ isOwner: await verifyOwner(data.ownerKey, env.OWNER_DEVICE_HASH) });
+
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
     const { success } = await env.POST_LIMIT.limit({ key: ip });
     if (!success) return json({ error: "Too many notes" }, 429);
 
-    const data = await parseMessage(request);
-    if (!data) return json({ error: "Invalid message or reply target" }, 400);
     const isOwner = await verifyOwner(data.ownerKey, env.OWNER_DEVICE_HASH);
-    if (data.verifyDevice) return json({ isOwner });
     if (data.ownerKey !== undefined && !isOwner) return json({ error: "Owner device not paired" }, 403);
 
     const location = visitorLocation(request.cf);

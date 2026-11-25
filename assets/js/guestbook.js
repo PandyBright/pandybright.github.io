@@ -2,6 +2,7 @@ const guestbook = document.querySelector("[data-guestbook-api]");
 const api = guestbook.dataset.guestbookApi;
 
 if (api) {
+  const title = document.querySelector("[data-guestbook-title]");
   const form = guestbook.querySelector(".guestbook__form");
   const replyTemplate = form.cloneNode(true);
   const refresh = guestbook.querySelector(".guestbook__entries-head .guestbook__refresh");
@@ -11,6 +12,7 @@ if (api) {
   const requestTimeout = 15000;
   const deviceKeyStorage = "pandybright-guestbook-device";
   let ownerKey;
+  let ownerTitleAvatar;
   let latestLoad = 0;
 
   try {
@@ -28,39 +30,33 @@ if (api) {
     });
   }
 
-  function toHex(bytes) {
-    return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+  function createOwnerAvatar(size, alt = "") {
+    const avatar = document.createElement("img");
+    avatar.src = guestbook.dataset.ownerAvatar;
+    avatar.alt = alt;
+    avatar.width = size;
+    avatar.height = size;
+    return avatar;
   }
 
-  const devicePanel = guestbook.querySelector("[data-owner-device]");
-  const pairButton = devicePanel.querySelector("[data-device-pair]");
-  const fingerprint = devicePanel.querySelector("[data-device-fingerprint]");
-  const status = devicePanel.querySelector("[data-device-status]");
-  const updatePairingVisibility = () => { devicePanel.hidden = location.hash !== "#owner-device"; };
-  window.addEventListener("hashchange", updatePairingVisibility);
-  updatePairingVisibility();
+  function showOwnerTitleAvatar() {
+    if (!title || ownerTitleAvatar) return;
+    ownerTitleAvatar = createOwnerAvatar(34, guestbook.dataset.ownerName);
+    ownerTitleAvatar.className = "guestbook__title-avatar";
+    title.append(ownerTitleAvatar);
+  }
 
-  pairButton.addEventListener("click", async () => {
-    pairButton.disabled = true;
+  async function verifyOwnerDevice() {
+    if (!ownerKey) return;
     try {
-      if (!ownerKey) {
-        const newKey = toHex(crypto.getRandomValues(new Uint8Array(32)));
-        localStorage.setItem(deviceKeyStorage, newKey);
-        ownerKey = newKey;
-      }
-      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ownerKey));
-      fingerprint.textContent = toHex(new Uint8Array(digest));
-      pairButton.textContent = "Check pairing";
       const response = await send({ ownerKey, verifyDevice: true });
-      if (!response.ok) throw new Error(`Guestbook returned ${response.status}`);
+      if (!response.ok) return;
       const { isOwner } = await response.json();
-      status.textContent = isOwner ? "This browser is paired as Pandy Bright." : "Waiting for Cloudflare approval.";
+      if (isOwner === true) showOwnerTitleAvatar();
     } catch {
-      status.textContent = "Could not check this browser’s pairing.";
-    } finally {
-      pairButton.disabled = false;
+      // Leave the title unchanged if the identity check is unavailable.
     }
-  });
+  }
 
   function renderMessage(entry) {
     const item = document.createElement("li");
@@ -71,14 +67,7 @@ if (api) {
     const isOwner = entry.is_owner === 1;
     const name = isOwner ? guestbook.dataset.ownerName : "Guest";
     author.className = "guestbook__author";
-    if (isOwner) {
-      const avatar = document.createElement("img");
-      avatar.src = guestbook.dataset.ownerAvatar;
-      avatar.alt = "";
-      avatar.width = 28;
-      avatar.height = 28;
-      author.append(avatar);
-    }
+    if (isOwner) author.append(createOwnerAvatar(28));
     const label = document.createElement("span");
     label.textContent = entry.location ? `${name} from ${entry.location}` : name;
     author.append(label);
@@ -233,11 +222,14 @@ if (api) {
           return;
         }
         if (response.status === 403 && ownerKey) {
-          postStatus.textContent = "This browser’s owner pairing could not be verified. Your draft is still here.";
+          ownerTitleAvatar?.remove();
+          ownerTitleAvatar = undefined;
+          postStatus.textContent = "Could not verify your identity. Your draft is still here.";
           return;
         }
         if (!response.ok) throw new Error(`Guestbook returned ${response.status}`);
 
+        if (ownerKey) showOwnerTitleAvatar();
         message.value = "";
         updateCount();
         postStatus.textContent = `Your ${kind} was posted.`;
@@ -258,5 +250,6 @@ if (api) {
   setupComposer(form);
   refresh.hidden = false;
   refresh.addEventListener("click", loadEntries);
+  verifyOwnerDevice();
   loadEntries();
 }

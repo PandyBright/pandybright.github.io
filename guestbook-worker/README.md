@@ -17,4 +17,13 @@ The site displays the latest 50 notes with their replies. To remove a reply, del
 
 For an existing database created before owner attribution, run `npx wrangler d1 execute pandybright-guestbook --remote --file=owner-attribution.sql` once before deploying this version of the Worker. A new database initialized from `schema.sql` already has these columns.
 
-In the owner's browser profile, open `/guestbook/#owner-device` and generate a browser fingerprint. Set the production Worker's `OWNER_DEVICE_HASH` text variable to the displayed fingerprint and check pairing on the same page. The browser keeps the random device key in local storage. The fingerprint alone cannot authorize a post. Removing the variable revokes that browser's ability to post as the owner. If site data is cleared, generate a new fingerprint and update the variable.
+The guestbook recognizes an approved browser profile when it opens and shows the owner's avatar next to the title. To pair a profile after changing browsers or clearing site data, open `/guestbook/` in that profile and run the following in the browser's developer console. Set the production Worker's `OWNER_DEVICE_HASH` text variable to the resulting fingerprint, then reload the guestbook. Removing the variable revokes that browser's ability to post as the owner.
+
+```js
+const storageKey = "pandybright-guestbook-device";
+const toHex = bytes => Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+const key = localStorage.getItem(storageKey) || toHex(crypto.getRandomValues(new Uint8Array(32)));
+localStorage.setItem(storageKey, key);
+const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
+console.log(toHex(new Uint8Array(digest)));
+```
